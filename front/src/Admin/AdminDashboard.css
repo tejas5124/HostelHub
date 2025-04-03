@@ -1,0 +1,159 @@
+/* Dashboard Container */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+/* Main Dashboard Content */
+.admin-dashboard {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Collapsed Sidebar */
+.sidebar.collapsed + .admin-dashboard {
+  margin-left: 80px;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 24px;
+  font-weight: bold;
+  color: #001529;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Statistics Section */
+.dashboard-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Stat Box */
+.stat-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 250px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+/* Hover Effect */
+.stat-box:hover {
+  transform: translateY(-5px);
+  background: #e6f7ff;
+}
+
+/* Stat Icon */
+.stat-icon {
+  font-size: 40px;
+  color: #40a9ff;
+  margin-right: 20px;
+}
+
+/* Stat Text */
+.stat-box h3 {
+  margin: 0;
+  font-size: 28px;
+  color: #001529;
+}
+
+.stat-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #595959;
+}
+
+/* Recent Activities Section */
+.dashboard-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  margin-top: 40px;
+}
+
+/* Section Hover Effect */
+.dashboard-section:hover {
+  transform: translateY(-5px);
+}
+
+/* Section Title */
+.dashboard-section h3 {
+  margin-top: 0;
+  font-size: 20px;
+  color: #001529;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+/* Section Lists */
+.dashboard-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* List Items */
+.dashboard-section li {
+  background: white;
+  color: #595959;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, transform 0.3s ease;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+/* Last List Item */
+.dashboard-section li:last-child {
+  border-bottom: none;
+}
+
+/* List Hover Effect */
+.dashboard-section li:hover {
+  background: #e6f7ff;
+  transform: translateX(5px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .admin-dashboard {
+    margin-left: 80px;
+  }
+
+  .dashboard-stats {
+    flex-direction: column;
+  }
+
+  .stat-box {
+    min-width: 100%;
+  }
+}
