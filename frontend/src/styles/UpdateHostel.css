@@ -1,0 +1,162 @@
+/* UpdateHostel.css */
+
+.update-hostel-container {
+  padding-top: 100px;
+  padding: 100px 20px 20px 20px;
+}
+
+/* Hostel List Layout */
+.hostel-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hostel-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Button Styling */
+.update-btn,
+.submit-button,
+.back-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.update-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.update-btn:hover {
+  background-color: #0056b3;
+}
+
+.submit-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.back-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.back-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Forms */
+.form,
+.hostel-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.hostel-update-form label {
+  font-size: 15px;
+  gap: 4px;
+}
+
+.hostel-update-form input::placeholder,
+.hostel-update-form textarea::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+
+.hostel-update-form input:focus,
+.hostel-update-form textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Container Styling */
+.enhanced-form {
+  background-color: #f9f9f9;
+  padding: 30px;
+  margin: 30px auto;
+  border-radius: 15px;
+  max-width: 650px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Button container */
+.btn-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+/* Success message */
+.message {
+  margin-top: 10px;
+  color: green;
+  font-weight: bold;
+}
+
+/* Fieldset section styling */
+.fieldset {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.fieldset legend {
+  font-weight: bold;
+  font-size: 16px;
+  padding: 0 10px;
+}
+
+.fieldset label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 600px) {
+  .enhanced-form {
+    padding: 20px;
+    margin: 15px;
+  }
+
+  .btn-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .submit-button,
+  .back-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hostel-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

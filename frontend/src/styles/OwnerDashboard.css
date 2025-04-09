@@ -1,0 +1,248 @@
+    /* General */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Header */
+    .navbar {
+        background-color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    .navbar .logo {
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar .logo img {
+        height: 50px;
+        margin-right: 10px;
+    }
+
+    .navbar h1 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2d3436;
+        margin: 0;
+    }
+
+    /* Logout Button */
+    /* Modern Logout Button */
+    .logout-btn {
+        background: linear-gradient(135deg, #ff4b5c, #d72638); /* Gradient Red */
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        cursor: pointer;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 10px rgba(255, 75, 92, 0.3);
+    }
+
+    /* Add Logout Icon */
+    .logout-btn::before {
+        content: "🚀"; /* You can replace this with an icon */
+        font-size: 1.2rem;
+    }
+
+    /* Hover Effect */
+    .logout-btn:hover {
+        background: linear-gradient(135deg, #d72638, #ff4b5c); /* Reverse Gradient */
+        box-shadow: 0 6px 15px rgba(255, 75, 92, 0.5);
+        transform: translateY(-3px);
+    }
+
+    /* Active Click Effect */
+    .logout-btn:active {
+        transform: scale(0.95);
+    }
+
+
+    /* Horizontal Navigation (Replacing Sidebar) */
+    .nav-menu {
+        display: flex;
+        justify-content: center;
+        margin-top: 80px; /* Adjust below the navbar */
+        padding: 20px 0;
+    }
+
+    .nav-menu .nav-button {
+        background-color: white;
+        color: #007bff;
+        border: 2px solid #007bff;
+        padding: 15px 20px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 0 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .nav-menu .nav-button:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-top: 80px; /* Adjust this value according to navbar height */
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    
+
+
+    /* Forms */
+    .form-container {
+        max-width: 600px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: auto; /* Ensures it is centered */
+        text-align: center;
+    }
+    
+
+    .form-container h2 {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .form input,
+    .form textarea {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .form button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        border-radius: 25px;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+
+    .form button:hover {
+        background-color: #0056b3;
+    }
+    /* Guide Section - Modern UI */
+    .guide-section {
+        margin: 40px auto;
+        padding: 30px;
+        width: 90%;
+        max-width: 1200px;
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    .guide-section h2 {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 25px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* Guide Container Grid (3 in each row) */
+    .guide-containers {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 columns per row */
+        gap: 25px;
+        justify-content: center;
+    }
+    
+    /* Individual Guide Item */
+    .guide-container {
+        background: linear-gradient(135deg, #ff7e5f, #a84dbf); /* Peachy-Orange to Purple */
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: left;
+        font-size: 17px;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        min-height: 160px;
+    }
+    
+    /* Hover Effect */
+    .guide-container:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Guide Container Title */
+    .guide-container strong {
+        display: block;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+    
+    /* Animated Icon in Background */
+    .guide-container::before {
+        content: "✨";
+        font-size: 60px;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        opacity: 0.2;
+    }
+    
+    /* Responsive Design (For Smaller Screens) */
+    @media (max-width: 1024px) {
+        .guide-containers {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .guide-containers {
+        grid-template-columns: repeat(1, 1fr); /* 1 column on small screens */
+        }
+        
+        .guide-container {
+        padding: 15px;
+        }
+        
+        .guide-container::before {
+        font-size: 40px;
+        }
+    }
+    

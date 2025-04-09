@@ -1,0 +1,65 @@
+/* Owner Header Styles */
+
+.header {
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.header .logo {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.header .logo img {
+    height: 50px;
+    margin-right: 10px;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #2d3436;
+    margin: 0;
+}
+
+/* Logout Button */
+.logout-btn {
+    background: linear-gradient(135deg, #ff4b5c, #d72638);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(255, 75, 92, 0.3);
+}
+
+.logout-btn::before {
+    content: "🚀";
+    font-size: 1.2rem;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #d72638, #ff4b5c);
+    box-shadow: 0 6px 15px rgba(255, 75, 92, 0.5);
+    transform: translateY(-3px);
+}
+
+.logout-btn:active {
+    transform: scale(0.95);
+}

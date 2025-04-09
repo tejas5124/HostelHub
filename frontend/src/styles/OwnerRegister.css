@@ -1,0 +1,77 @@
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: white; /* Set pure white background */
+}
+
+.register-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+  width: 380px;
+  text-align: center;
+  transition: 0.3s ease-in-out;
+}
+
+.register-card:hover {
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.register-card h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.register-card input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.register-card input:focus {
+  border-color: #2575fc;
+  outline: none;
+  box-shadow: 0px 0px 8px rgba(37, 117, 252, 0.4);
+}
+
+.register-btn {
+  width: 100%;
+  padding: 12px;
+  background: #2575fc;
+  color: white;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register-btn:hover {
+  background: #1a5cc7;
+}
+
+.switch-page {
+  margin-top: 12px;
+  font-size: 15px;
+  color: #333;
+}
+
+.switch-page span {
+  color: #2575fc;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.switch-page span:hover {
+  text-decoration: underline;
+  color: #1a5cc7;
+}
