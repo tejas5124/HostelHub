@@ -12,11 +12,14 @@ import AdminRegister from './LoginRegister/AdminRegister';
 import OwnerDashboard from './dashboard/OwnerDashboard';
 import AdminDashboard from './dashboard/AdminDashboard';
 import StudentDashboard from './dashboard/student-dashboard';
-
+import HostelView from './home/HostelView';
+import ManageStudents from './dashboard/ManageStudents';
+import MyBookings from './dashboard/MyBookings';
 import AddHostel from "./dashboard/AddHostel";
 import RemoveHostel from "./dashboard/RemoveHostel";
 import ViewHostels from "./dashboard/ViewHostels";
 import UpdateHostels from "./dashboard/UpdateHostel";
+import Profile from './dashboard/Profile';
 
 
 function App() {
@@ -26,7 +29,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/login" element={<Shc/>} />
-        <Route path="/student-Login" element={<StudentLogin />} />
+        <Route path="/student-login" element={<StudentLogin />} />
         <Route path="/student-register" element={<StudentRegister />} />
         <Route path="/owner-login" element={<OwnerLogin />} />
         <Route path="/owner-register" element={<OwnerRegister />} />
@@ -37,16 +40,12 @@ function App() {
         <Route path="/add-hostel" element={<AddHostel />} />
         <Route path="/remove-hostel" element={<RemoveHostel />} />
         <Route path="/view-hostels" element={<ViewHostels />} />
-        <Route path="/Update-hostels" element={<UpdateHostels />} />
-
-
-
-
-        {/* Add other routes as needed */
-        
+        <Route path="/update-hostels" element={<UpdateHostels />} />
+        <Route path="/hostel-view" element={<HostelView />} />
         <Route path="/student-dashboard" element={<StudentDashboard />} />
-
-        }
+        <Route path="/manage-students" element={<ManageStudents />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

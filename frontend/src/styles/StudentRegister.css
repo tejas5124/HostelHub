@@ -2,106 +2,197 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
+  margin: 20;
+  padding:30px;
   background: #f4f7fc; /* Light, subtle background for a clean look */
 }
 
-.register-container {
+.register-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  padding: 20px; /* Added padding for smaller screens */
+  min-height: 150vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 10px 20px;
+  margin-top: 50px;
 }
 
-.right-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 12px; /* Slightly more rounded corners */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Softer shadow for a more elevated effect */
-  padding: 40px;
+.register-card {
+  background: white;
+  padding: 50px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px; /* Match the width with the StudentLogin form */
+  max-width: 700px;
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.form-container h2 {
-  color: #0056b3; /* Stronger blue color for the heading */
-  margin-bottom: 25px;
-  font-size: 26px; /* Slightly larger heading */
+.register-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.register-card h2 {
+  color: #2c3e50;
+  margin-bottom: 30px;
+  font-size: 28px;
   font-weight: 700;
 }
 
-.form-container p {
-  margin-bottom: 25px;
-  font-size: 15px; /* Slightly larger font size for better readability */
-  color: #666;
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  margin-bottom: 30px;
+  overflow: hidden;
 }
 
-.form-container a {
-  color: #007bff; /* Brighter blue for links */
-  text-decoration: none;
-  font-weight: 600;
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  transition: width 0.3s ease;
 }
 
-.form-container a:hover {
-  color: #0056b3; /* Darker blue on hover */
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-form input,
-form select,
-form textarea {
-  padding: 14px;
-  border: 1px solid #ddd; /* Lighter border for a cleaner look */
-  border-radius: 6px; /* Slightly more rounded corners */
-  font-size: 16px;
-  width: 100%; /* Full width input boxes */
+.form-group {
   margin-bottom: 20px;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  text-align: left;
 }
 
-form input::placeholder,
-form textarea::placeholder {
-  color: #bbb; /* Slightly lighter placeholder color */
-}
-
-form input:focus,
-form select:focus,
-form textarea:focus {
-  border-color: #007bff; /* Brighter blue border on focus */
-  outline: none;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2); /* Softer shadow on focus */
-}
-
-form textarea {
-  resize: vertical; /* Allow vertical resizing */
-}
-
-.register-button {
-  background-color: #007bff; /* Brighter blue for the button */
-  color: #ffffff;
-  border: none;
-  padding: 14px;
-  border-radius: 6px;
-  cursor: pointer;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 16px;
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-  width: 100%; /* Full width button */
-  font-weight: 600;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
 }
 
-.register-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-  transform: translateY(-2px); /* Subtle lift effect on hover */
-  box-shadow: 0 8px 20px rgba(0, 86, 179, 0.2); /* Add shadow on hover */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #4CAF50;
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
+
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: #ff5252;
+  background: #fff5f5;
+}
+
+.error-message {
+  color: #ff5252;
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.register-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.register-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.register-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.switch-page {
+  margin-top: 20px;
+  color: #666;
+  font-size: 15px;
+}
+
+.link-text {
+  color: #4CAF50;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.link-text:hover {
+  color: #388E3C;
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-card {
+    padding: 30px;
+    max-width: 90%;
+  }
+
+  .register-page {
+    padding: 50px 15px;
+    margin-top: 30px;
+  }
+
+  .register-card h2 {
+    font-size: 24px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .register-btn {
+    padding: 12px;
+    font-size: 16px;
+  }
+}
+
+/* Animation for form elements */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-group {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
+.form-group:nth-child(5) { animation-delay: 0.5s; }
+.form-group:nth-child(6) { animation-delay: 0.6s; }
+.form-group:nth-child(7) { animation-delay: 0.7s; }
+.form-group:nth-child(8) { animation-delay: 0.8s; }

@@ -5,26 +5,25 @@ import '../styles/AdminDashboard.css';
 import ViewHostels from './view_hostel_admin';
 import ApproveHostel from './ApproveHostel';
 import ViewStudents from './ViewStudents';
+import AdminHeader from './AdminHeader';
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [formType, setFormType] = useState(null);
   const [hostels, setHostels] = useState([]);
   const [approvedCount, setApprovedCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
-  const [updateCount, setUpdateCount] = useState(0); // Track updates
+  const [updateCount, setUpdateCount] = useState(0);
 
-  // Fetch hostels data when component mounts or when updateCount changes
   useEffect(() => {
     const fetchHostels = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/all-hostels'); // Fetch hostels
+        const response = await axios.get('http://localhost:5000/all-hostels');
         const hostelsData = response.data;
 
         setHostels(hostelsData);
 
-        // Update counts
         const approved = hostelsData.filter(hostel => hostel.approval_status === 'approved').length;
         const pending = hostelsData.filter(hostel => hostel.approval_status === 'pending').length;
         const rejected = hostelsData.filter(hostel => hostel.approval_status === 'rejected').length;
@@ -37,43 +36,54 @@ function AdminDashboard() {
       }
     };
 
-    fetchHostels(); // Fetch data initially
-  }, [updateCount]); // Re-fetch when updateCount changes
+    fetchHostels();
+  }, [updateCount]);
 
-  const handleLogout = () => {
-    // Implement logout logic here, like clearing tokens or session
-    navigate('/admin-login'); // Redirect to login page
-  };
-
-  const handleComponentChange = (component) => {
-    setSelectedComponent(component);
+  const handleButtonClick = (type) => {
+    setFormType(type);
   };
 
   const triggerUpdate = () => {
-    setUpdateCount(prev => prev + 1); // Increment to trigger re-fetch
+    setUpdateCount(prev => prev + 1);
   };
 
   return (
     <div className="dashboard">
-      <div className="sidebar">
-        <h2>Admin Dashboard</h2>
-        <ul>
-          <li onClick={() => handleComponentChange('viewHostels')}>View Hostels</li>
-          <li onClick={() => handleComponentChange('approveHostel')}>Approve Hostels</li>
-          <li onClick={() => handleComponentChange('viewStudents')}>View Students</li>
-        </ul>
-        <button onClick={handleLogout} className="logout-button">Logout</button>
+      <AdminHeader />
+      
+      <div className="nav-menu">
+        <button className="nav-button" onClick={() => handleButtonClick("view")}>View All Hostels</button>
+        <button className="nav-button" onClick={() => handleButtonClick("approve")}>Approve Hostels</button>
+        <button className="nav-button" onClick={() => handleButtonClick("students")}>View Students</button>
       </div>
+
       <div className="main-content">
-        <header>
-          <h1>Welcome, Admin!</h1>
-          <p>Manage your hostels and view statistics here.</p>
-        </header>
-        <div className="content">
-          {selectedComponent === 'viewHostels' && <ViewHostels />}
-          {selectedComponent === 'approveHostel' && <ApproveHostel onAction={triggerUpdate} />} {/* Pass triggerUpdate */}
-          {selectedComponent === 'viewStudents' && <ViewStudents />}
-        </div>
+        {formType === 'view' && <ViewHostels />}
+        {formType === 'approve' && <ApproveHostel onAction={triggerUpdate} />}
+        {formType === 'students' && <ViewStudents />}
+
+        {/* Guide Section (Shown when no component is selected) */}
+        {!formType && (
+          <section className="guide-section">
+            <h2>Admin Dashboard Guide</h2>
+            <div className="guide-containers">
+              <div className="guide-container">
+                <strong>View All Hostels</strong>
+                View and manage all hostels in the system, including their details and status.
+              </div>
+              <div className="guide-container">
+                <strong>Approve Hostels</strong>
+                Review and approve pending hostel registrations from hostel owners.
+              </div>
+              <div className="guide-container">
+                <strong>View Students</strong>
+                Access and manage student information and their hostel bookings.
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Statistics Cards */}
         <div className="stats-cards">
           <div className="card">
             <h3>Total Hostels</h3>

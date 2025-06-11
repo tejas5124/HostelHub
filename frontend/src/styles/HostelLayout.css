@@ -1,0 +1,31 @@
+.hostel-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hostel-content {
+  flex: 1;
+  padding-top: 150px; /* 80px (header) + 70px (nav) */
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 2rem;
+  background-color: #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hostel-content {
+    padding-top: 120px; /* 60px (header) + 60px (nav) */
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hostel-content {
+    padding-top: 110px; /* 60px (header) + 50px (nav) */
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+} 

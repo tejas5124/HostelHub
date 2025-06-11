@@ -10,24 +10,45 @@ const fs = require('fs');
 
 // Create the Express app
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 const saltRounds = 10; // Number of salt rounds for bcrypt hashing
 
 // MySQL database connection
-const db = mysql.createConnection ({
-  host: 'localhost',
-  user: 'root', // Replace with your MySQL username
-  password: 'Balaji', // Replace with your MySQL password
-  database: 'hostel' // Replace with your MySQL database name
+const db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'Balaji',
+    database: 'hostel',
+    connectTimeout: 10000, // 10 seconds
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-// Connect to MySQL
+// Connect to MySQL with better error handling
 db.connect((err) => {
-  if (err) {
-    console.error('Database connection failed:', err.stack);
-    return;
-  }
-  console.log('Connected to MySQL database.');
+    if (err) {
+        console.error('Database connection failed:', err.stack);
+        return;
+    }
+    console.log('Connected to MySQL database successfully.');
+});
+
+// Handle database connection errors
+db.on('error', (err) => {
+    console.error('Database error:', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+        console.log('Attempting to reconnect to database...');
+        db.connect((err) => {
+            if (err) {
+                console.error('Reconnection failed:', err);
+            } else {
+                console.log('Reconnected to database successfully.');
+            }
+        });
+    } else {
+        throw err;
+    }
 });
 
 // Middleware
@@ -290,28 +311,43 @@ app.post('/register_admin', async (req, res) => {
 
 // Route to handle adding hostel details
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Specify the folder to store uploaded images
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Generate a unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
 const upload = multer({ storage });
+
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Your add-hostel route with image upload
 app.post("/add-hostel", upload.single("image"), (req, res) => {
   console.log("Request body:", req.body);
   console.log("Uploaded file:", req.file);
 
-  const { owner_id, name, address, description, total_rooms, available_rooms, rent, facilities } = req.body;
+  const { owner_id, name, address, description, total_rooms, available_rooms, rent, facilities, hostel_gender } = req.body;
   const image_path = req.file ? req.file.filename : null;
 
-  if (!owner_id || !name || !address || !description || !total_rooms || !available_rooms || !rent || !image_path) {
-    return res.status(400).json({ message: "All fields including image are required" });
+  if (!owner_id || !name || !address || !description || !total_rooms || !available_rooms || !rent || !image_path || !hostel_gender) {
+    return res.status(400).json({ message: "All fields including image and hostel gender are required" });
+  }
+
+  // Validate hostel_gender
+  if (!['boys', 'girls'].includes(hostel_gender)) {
+    return res.status(400).json({ message: "Invalid hostel gender. Must be either 'boys' or 'girls'" });
   }
 
   let parsedFacilities = [];
@@ -323,10 +359,23 @@ app.post("/add-hostel", upload.single("image"), (req, res) => {
 
   const approval_status = "pending";
 
+  // Parse numeric fields to ensure correct values
+  const parsedTotalRooms = parseInt(total_rooms, 10);
+  const parsedAvailableRooms = parseInt(available_rooms, 10);
+  
+  // Validate rent is a positive number and has at most 2 decimal places
+  const rentValue = parseFloat(rent);
+  if (isNaN(rentValue) || rentValue <= 0) {
+    return res.status(400).json({ message: "Rent must be a positive number" });
+  }
+  
+  // Round to 2 decimal places to avoid floating point issues
+  const roundedRent = Math.round(rentValue * 100) / 100;
+
   const query = `
     INSERT INTO hosteldetails 
-    (owner_id, name, address, description, total_rooms, available_rooms, approval_status, rent, image_path, facilities) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (owner_id, name, address, description, total_rooms, available_rooms, approval_status, rent, image_path, facilities, hostel_gender) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   
   const values = [
@@ -334,12 +383,13 @@ app.post("/add-hostel", upload.single("image"), (req, res) => {
     name,
     address,
     description,
-    total_rooms,
-    available_rooms,
+    parsedTotalRooms,
+    parsedAvailableRooms,
     approval_status,
-    rent,
+    roundedRent,
     image_path,
     JSON.stringify(parsedFacilities),
+    hostel_gender
   ];
 
   db.query(query, values, (err, results) => {
@@ -381,7 +431,7 @@ app.get('/owner-hostels/:ownerId', (req, res) => {
   const ownerId = req.params.ownerId;
 
   const query = `
-    SELECT hostel_id, name, address, description, rent, total_rooms, available_rooms, approval_status, image_path,  facilities
+    SELECT hostel_id, name, address, description, rent, total_rooms, available_rooms, approval_status, image_path, facilities, hostel_gender
     FROM hosteldetails 
     WHERE owner_id = ?
   `;
@@ -396,14 +446,13 @@ app.get('/owner-hostels/:ownerId', (req, res) => {
       return res.status(404).json({ message: 'No hostels found for this owner' });
     }
 
-    // Process results to include base64 encoded image_path
+    // Process results to include proper image URLs
     const hostels = results.map(hostel => {
-      const imageBuffer = hostel.image_path ? hostel.image_path.toString('base64') : null;
-    
-
+      const imagePath = hostel.image_path ? `/uploads/${hostel.image_path}` : null;
+      console.log('Image path:', imagePath); // Debug log
       return {
         ...hostel,
-        image_path: imageBuffer ? `data:image/jpeg;base64,${imageBuffer} `: null, // Base64-encoded image
+        image_path: imagePath
       };
     });
   
@@ -480,29 +529,66 @@ app.delete('/api/students/:id', (req, res) => {
 
 // Make sure this route is in your server file (e.g., index.js)
 app.put('/update-hostel', (req, res) => {
-  const { hostel_id, total_rooms, rent, address, description, facilities } = req.body;
+  const { hostel_id, owner_id, name, total_rooms, available_rooms, rent, address, description, facilities } = req.body;
 
-  if (!hostel_id || !total_rooms || !rent || !address || !description) {
+  if (!hostel_id || !owner_id || !name || !total_rooms || !available_rooms || !rent || !address || !description) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
-  // Handle facilities data: Ensure it's a valid JSON array
+  // Validate rent is a positive number and has at most 2 decimal places
+  const rentValue = parseFloat(rent);
+  if (isNaN(rentValue) || rentValue <= 0) {
+    return res.status(400).json({ message: "Rent must be a positive number" });
+  }
+  
+  // Round to 2 decimal places to avoid floating point issues
+  const roundedRent = Math.round(rentValue * 100) / 100;
+
+  // Validate room numbers
+  if (available_rooms > total_rooms) {
+    return res.status(400).json({ message: "Available rooms cannot be more than total rooms" });
+  }
+
+  // Handle facilities data: Convert string to array if needed
   let facilitiesData;
   try {
-    facilitiesData = JSON.stringify(facilities || []);
+    if (typeof facilities === 'string') {
+      facilitiesData = JSON.stringify(facilities.split(',').map(f => f.trim()).filter(f => f));
+    } else if (Array.isArray(facilities)) {
+      facilitiesData = JSON.stringify(facilities);
+    } else {
+      facilitiesData = JSON.stringify([]);
+    }
   } catch (err) {
+    console.error('Error processing facilities:', err);
     return res.status(400).json({ message: 'Invalid facilities data' });
   }
 
   const query = `UPDATE hosteldetails
-                 SET total_rooms = ?, rent = ?, address = ?, description = ?, facilities = ?
-                 WHERE hostel_id = ?`;
+                 SET name = ?, total_rooms = ?, available_rooms = ?, rent = ?, 
+                     address = ?, description = ?, facilities = ?
+                 WHERE hostel_id = ? AND owner_id = ?`;
 
-  db.query(query, [total_rooms, rent, address, description, facilitiesData, hostel_id], (err, result) => {
+  db.query(query, [
+    name,
+    total_rooms,
+    available_rooms,
+    roundedRent,
+    address,
+    description,
+    facilitiesData,
+    hostel_id,
+    owner_id
+  ], (err, result) => {
     if (err) {
       console.error('Error updating hostel:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
     }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Hostel not found or you do not have permission to update it' });
+    }
+
     res.status(200).json({ message: 'Hostel updated successfully!' });
   });
 });
@@ -634,7 +720,7 @@ app.get('/api/owner-hostels', (req, res) => {
 // Fetch all hostels
 app.get('/all-hostels', (req, res) => {
   const query = `
-    SELECT hostel_id, name, address, description, rent, total_rooms, available_rooms, approval_status, image_path 
+    SELECT hostel_id, name, address, description, rent, total_rooms, available_rooms, approval_status, image_path, hostel_gender 
     FROM hosteldetails
   `;
 
@@ -651,7 +737,7 @@ app.get('/all-hostels', (req, res) => {
 
 
 //count of hostels
-// Example: Express.js route
+
 app.get('/hostel-stats', async (req, res) => {
   try {
     const totalHostels = await db.query('SELECT COUNT(*) AS total FROM hostels');
@@ -670,7 +756,7 @@ app.get('/hostel-stats', async (req, res) => {
 
 
 /// Route to fetch all hostels
-app.use('../back/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/stu_hostels', (req, res) => {
   db.query(
@@ -737,7 +823,531 @@ app.post('/update_payment_status/:bookingId', (req, res) => {
 
 
 
+// Route to get student details
+app.get('/student-details/:id', (req, res) => {
+  const studentId = req.params.id;
+  const query = 'SELECT student_id, name, email, phone_number, gender, address FROM student WHERE student_id = ?';
+  
+  db.query(query, [studentId], (err, results) => {
+    if (err) {
+      console.error('Error fetching student details:', err);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+    
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    
+    res.status(200).json(results[0]);
+  });
+});
+
+// Route to get student statistics
+app.get('/student-stats/:id', (req, res) => {
+  const studentId = req.params.id;
+  
+  // Get total bookings
+  const totalBookingsQuery = 'SELECT COUNT(*) as total FROM bookings WHERE student_id = ?';
+  
+  // Get active bookings (bookings that haven't ended)
+  const activeBookingsQuery = `
+    SELECT COUNT(*) as active 
+    FROM bookings 
+    WHERE student_id = ? 
+    AND booking_date <= CURDATE() 
+    AND (end_date IS NULL OR end_date >= CURDATE())
+  `;
+  
+  db.query(totalBookingsQuery, [studentId], (err, totalResults) => {
+    if (err) {
+      console.error('Error fetching total bookings:', err);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+    
+    db.query(activeBookingsQuery, [studentId], (err, activeResults) => {
+      if (err) {
+        console.error('Error fetching active bookings:', err);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+      
+      res.status(200).json({
+        totalBookings: totalResults[0].total || 0,
+        activeBookings: activeResults[0].active || 0
+      });
+    });
+  });
+});
+
+// Route to get owner details
+app.get('/owner-details/:id', (req, res) => {
+  const ownerId = req.params.id;
+  const query = 'SELECT owner_id, name, email, phone_number, address FROM hostelowner WHERE owner_id = ?';
+  
+  db.query(query, [ownerId], (err, results) => {
+    if (err) {
+      console.error('Error fetching owner details:', err);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+    
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Owner not found' });
+    }
+    
+    res.status(200).json(results[0]);
+  });
+});
+
+// Route to get admin details
+app.get('/admin-details/:id', (req, res) => {
+  const adminId = req.params.id;
+  const query = 'SELECT admin_id, name, email, phone_number, position FROM collegeadministration WHERE admin_id = ?';
+  
+  db.query(query, [adminId], (err, results) => {
+    if (err) {
+      console.error('Error fetching admin details:', err);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+    
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+    
+    res.status(200).json(results[0]);
+  });
+});
+
 // Start the server
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${port} is already in use. Please stop the other process or use a different port.`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', err);
+  }
+});
+
+// Route to get owner dashboard statistics
+app.get('/owner-stats/:ownerId', async (req, res) => {
+  const ownerId = req.params.ownerId;
+
+  try {
+    // Get total hostels
+    const [totalHostels] = await db.query(
+      'SELECT COUNT(*) as count FROM hosteldetails WHERE owner_id = ?',
+      [ownerId]
+    );
+
+    // Get approved hostels
+    const [approvedHostels] = await db.query(
+      'SELECT COUNT(*) as count FROM hosteldetails WHERE owner_id = ? AND approval_status = "approved"',
+      [ownerId]
+    );
+
+    // Get total available rooms
+    const [availableRooms] = await db.query(
+      'SELECT SUM(available_rooms) as total FROM hosteldetails WHERE owner_id = ?',
+      [ownerId]
+    );
+
+    // Get total students (from bookings)
+    const [totalStudents] = await db.query(
+      'SELECT COUNT(DISTINCT student_id) as count FROM bookings WHERE hostel_owner_id = ?',
+      [ownerId]
+    );
+
+    // Get pending bookings
+    const [pendingBookings] = await db.query(
+      'SELECT COUNT(*) as count FROM bookings WHERE hostel_owner_id = ? AND status = "pending"',
+      [ownerId]
+    );
+
+    // Get total revenue
+    const [totalRevenue] = await db.query(
+      'SELECT SUM(rent) as total FROM bookings WHERE hostel_owner_id = ? AND status = "approved"',
+      [ownerId]
+    );
+
+    res.json({
+      totalHostels: totalHostels[0].count || 0,
+      approvedHostels: approvedHostels[0].count || 0,
+      availableRooms: availableRooms[0].total || 0,
+      totalStudents: totalStudents[0].count || 0,
+      pendingBookings: pendingBookings[0].count || 0,
+      totalRevenue: totalRevenue[0].total || 0
+    });
+  } catch (error) {
+    console.error('Error fetching owner stats:', error);
+    res.status(500).json({ message: 'Error fetching owner statistics' });
+  }
+});
+
+// Add new booking request
+app.post('/add-booking', async (req, res) => {
+    const { hostel_id, student_id, check_in_date, check_out_date, total_amount, payment_status } = req.body;
+    
+    try {
+        console.log('Received booking request:', req.body); // Debug log
+
+        // First check if the hostel has available rooms
+        db.query(
+            'SELECT available_rooms FROM hosteldetails WHERE hostel_id = ?',
+            [hostel_id],
+            (err, hostelResults) => {
+                if (err) {
+                    console.error('Error checking hostel availability:', err);
+                    return res.status(500).json({ message: 'Error checking hostel availability' });
+                }
+
+                if (hostelResults.length === 0) {
+                    return res.status(404).json({ message: 'Hostel not found' });
+                }
+
+                if (hostelResults[0].available_rooms <= 0) {
+                    return res.status(400).json({ message: 'No rooms available in this hostel' });
+                }
+
+                // Insert the booking request
+                const bookingQuery = `
+                    INSERT INTO bookings (
+                        hostel_id, 
+                        student_id, 
+                        check_in_date, 
+                        check_out_date, 
+                        total_amount, 
+                        payment_status,
+                        booking_status,
+                        created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+                `;
+
+                const bookingValues = [
+                    hostel_id,
+                    student_id,
+                    check_in_date,
+                    check_out_date || null,
+                    total_amount,
+                    payment_status || 'pending'
+                ];
+
+                console.log('Executing booking query with values:', bookingValues);
+
+                db.query(bookingQuery, bookingValues, (err, result) => {
+                    if (err) {
+                        console.error('Error inserting booking:', err);
+                        return res.status(500).json({ message: 'Error adding booking request' });
+                    }
+
+                    res.status(201).json({
+                        message: 'Booking request submitted successfully',
+                        booking_id: result.insertId
+                    });
+                });
+            }
+        );
+    } catch (error) {
+        console.error('Unexpected error in add-booking:', error);
+        res.status(500).json({ message: 'Unexpected error adding booking request' });
+    }
+});
+
+// Get booking requests for a hostel owner
+app.get('/owner-bookings/:owner_id', (req, res) => {
+    const { owner_id } = req.params;
+    
+    console.log('Fetching bookings for owner_id:', owner_id); // Debug log
+
+    // First verify if the owner exists
+    const ownerCheckQuery = 'SELECT owner_id FROM hostelowner WHERE owner_id = ?';
+    
+    db.query(ownerCheckQuery, [owner_id], (err, ownerResults) => {
+        if (err) {
+            console.error('Error checking owner:', err);
+            return res.status(500).json({ message: 'Error verifying owner' });
+        }
+
+        if (ownerResults.length === 0) {
+            console.log('Owner not found:', owner_id);
+            return res.status(404).json({ message: 'Owner not found' });
+        }
+
+        // If owner exists, fetch their bookings
+        const query = `
+            SELECT 
+                b.*,
+                h.name as hostel_name,
+                h.address as hostel_address,
+                h.available_rooms,
+                s.name as student_name,
+                s.email as student_email,
+                s.phone_number as student_phone
+            FROM bookings b
+            JOIN hosteldetails h ON b.hostel_id = h.hostel_id
+            JOIN student s ON b.student_id = s.student_id
+            WHERE h.owner_id = ?
+            ORDER BY b.created_at DESC
+        `;
+
+        console.log('Executing bookings query for owner:', owner_id); // Debug log
+
+        db.query(query, [owner_id], (err, results) => {
+            if (err) {
+                console.error('Error fetching owner bookings:', err);
+                return res.status(500).json({ 
+                    message: 'Error fetching booking requests',
+                    error: err.message 
+                });
+            }
+
+            console.log('Found bookings:', results.length); // Debug log
+            res.json(results);
+        });
+    });
+});
+
+// Update booking status (approve/reject)
+app.put('/update-booking-status/:booking_id', (req, res) => {
+    const { booking_id } = req.params;
+    const { status } = req.body;
+    
+    if (!['approved', 'rejected', 'pending'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status. Must be approved, rejected, or pending' });
+    }
+
+    // First get the current booking status and hostel details
+    const checkQuery = `
+        SELECT b.booking_status, h.available_rooms, h.hostel_id, h.total_rooms
+        FROM bookings b
+        JOIN hosteldetails h ON b.hostel_id = h.hostel_id
+        WHERE b.booking_id = ?
+    `;
+
+    db.query(checkQuery, [booking_id], (err, results) => {
+        if (err) {
+            console.error('Error checking booking details:', err);
+            return res.status(500).json({ message: 'Error checking booking details' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        const currentStatus = results[0].booking_status;
+        const availableRooms = parseInt(results[0].available_rooms, 10);
+        const totalRooms = parseInt(results[0].total_rooms, 10);
+        const hostelId = results[0].hostel_id;
+
+        console.log('Current Status:', currentStatus);
+        console.log('Available Rooms:', availableRooms);
+        console.log('Total Rooms:', totalRooms);
+        console.log('New Status:', status);
+
+        // Handle status changes
+        if (status === 'approved') {
+            if (availableRooms <= 0) {
+                return res.status(400).json({ message: 'No rooms available for approval' });
+            }
+
+            // First update the booking status
+            const bookingUpdateQuery = 'UPDATE bookings SET booking_status = ? WHERE booking_id = ?';
+            
+            db.query(bookingUpdateQuery, [status, booking_id], (err) => {
+                if (err) {
+                    console.error('Error updating booking status:', err);
+                    return res.status(500).json({ message: 'Error updating booking status' });
+                }
+
+                // Then update the available rooms
+                const roomUpdateQuery = `
+                    UPDATE hosteldetails 
+                    SET available_rooms = ? 
+                    WHERE hostel_id = ? AND available_rooms > 0
+                `;
+                
+                const newAvailableRooms = availableRooms - 1;
+                console.log('New Available Rooms:', newAvailableRooms);
+
+                db.query(roomUpdateQuery, [newAvailableRooms, hostelId], (err, result) => {
+                    if (err) {
+                        console.error('Error updating available rooms:', err);
+                        return res.status(500).json({ message: 'Error updating available rooms' });
+                    }
+
+                    if (result.affectedRows === 0) {
+                        return res.status(400).json({ message: 'Failed to update available rooms' });
+                    }
+
+                    res.json({ 
+                        message: 'Booking approved successfully',
+                        available_rooms: newAvailableRooms
+                    });
+                });
+            });
+        } else if (status === 'rejected' && currentStatus === 'approved') {
+            // First update the booking status
+            const bookingUpdateQuery = 'UPDATE bookings SET booking_status = ? WHERE booking_id = ?';
+            
+            db.query(bookingUpdateQuery, [status, booking_id], (err) => {
+                if (err) {
+                    console.error('Error updating booking status:', err);
+                    return res.status(500).json({ message: 'Error updating booking status' });
+                }
+
+                // Then update the available rooms
+                const roomUpdateQuery = `
+                    UPDATE hosteldetails 
+                    SET available_rooms = ? 
+                    WHERE hostel_id = ? AND available_rooms < total_rooms
+                `;
+                
+                const newAvailableRooms = availableRooms + 1;
+                console.log('New Available Rooms:', newAvailableRooms);
+
+                db.query(roomUpdateQuery, [newAvailableRooms, hostelId], (err, result) => {
+                    if (err) {
+                        console.error('Error updating available rooms:', err);
+                        return res.status(500).json({ message: 'Error updating available rooms' });
+                    }
+
+                    if (result.affectedRows === 0) {
+                        return res.status(400).json({ message: 'Failed to update available rooms' });
+                    }
+
+                    res.json({ 
+                        message: 'Booking rejected successfully',
+                        available_rooms: newAvailableRooms
+                    });
+                });
+            });
+        } else {
+            // For other status changes (like pending or rejecting a pending booking)
+            const updateQuery = 'UPDATE bookings SET booking_status = ? WHERE booking_id = ?';
+            
+            db.query(updateQuery, [status, booking_id], (err) => {
+                if (err) {
+                    console.error('Error updating booking status:', err);
+                    return res.status(500).json({ message: 'Error updating booking status' });
+                }
+                res.json({ message: 'Booking status updated successfully' });
+            });
+        }
+    });
+});
+
+// Add payment status update endpoint
+app.put('/update-payment-status/:booking_id', (req, res) => {
+    const { booking_id } = req.params;
+    const { status } = req.body;
+    
+    const query = 'UPDATE bookings SET payment_status = ? WHERE booking_id = ?';
+    
+    db.query(query, [status, booking_id], (err) => {
+        if (err) {
+            console.error('Error updating payment status:', err);
+            return res.status(500).json({ message: 'Error updating payment status' });
+        }
+
+        res.json({ message: 'Payment status updated successfully' });
+    });
+});
+
+// Get bookings for a student
+app.get('/student-bookings/:student_id', (req, res) => {
+    const { student_id } = req.params;
+    
+    // First verify if the student exists
+    const studentCheckQuery = 'SELECT student_id FROM student WHERE student_id = ?';
+    
+    db.query(studentCheckQuery, [student_id], (err, studentResults) => {
+        if (err) {
+            console.error('Error checking student:', err);
+            return res.status(500).json({ message: 'Error verifying student' });
+        }
+
+        if (studentResults.length === 0) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // If student exists, fetch their bookings with hostel details
+        const query = `
+            SELECT 
+                b.*,
+                h.name as hostel_name,
+                h.address as hostel_address,
+                h.owner_id,
+                ho.name as owner_name,
+                ho.email as owner_email,
+                ho.phone_number as owner_phone
+            FROM bookings b
+            JOIN hosteldetails h ON b.hostel_id = h.hostel_id
+            JOIN hostelowner ho ON h.owner_id = ho.owner_id
+            WHERE b.student_id = ?
+            ORDER BY b.created_at DESC
+        `;
+
+        db.query(query, [student_id], (err, results) => {
+            if (err) {
+                console.error('Error fetching student bookings:', err);
+                return res.status(500).json({ 
+                    message: 'Error fetching bookings',
+                    error: err.message 
+                });
+            }
+
+            res.json(results);
+        });
+    });
+});
+
+// Update student profile
+app.put('/update-student/:student_id', (req, res) => {
+    const studentId = req.params.student_id;
+    const { phone_number } = req.body;
+
+    // Validate phone number
+    if (!phone_number || !/^\d{10}$/.test(phone_number)) {
+        return res.status(400).json({ 
+            error: 'Invalid phone number. Please provide a valid 10-digit phone number.' 
+        });
+    }
+
+    // First check if student exists
+    const checkQuery = 'SELECT student_id FROM student WHERE student_id = ?';
+    db.query(checkQuery, [studentId], (err, results) => {
+        if (err) {
+            console.error('Error checking student:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Student not found' });
+        }
+
+        // Update the phone number
+        const updateQuery = 'UPDATE student SET phone_number = ? WHERE student_id = ?';
+        db.query(updateQuery, [phone_number, studentId], (err, result) => {
+            if (err) {
+                console.error('Error updating student:', err);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(400).json({ error: 'Failed to update phone number' });
+            }
+
+            // Fetch updated student details
+            const fetchQuery = 'SELECT * FROM student WHERE student_id = ?';
+            db.query(fetchQuery, [studentId], (err, updatedResults) => {
+                if (err) {
+                    console.error('Error fetching updated student:', err);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+
+                res.json(updatedResults[0]);
+            });
+        });
+    });
 });

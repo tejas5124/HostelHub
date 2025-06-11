@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="footer">
       <div className="marquee">
-        <p>© 2024 Hostel Hub. All rights reserved. | Welcome to Hostel Hub!</p>
+        <p>© 2025 Hostel Hub. All rights reserved. | Welcome to Hostel Hub!</p>
       </div>
     </footer>
   );

@@ -1,443 +1,213 @@
-/* Style for "All Hostels" Title */
-.all-hostels-title {
-  text-align: center;
-  font-size: 30px;
-  font-weight: bold;
-  color: #222;
-  margin-top: 20px;
-  padding: 18px 0;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border-bottom: 4px solid #bbb;
-  letter-spacing: 1px;
+.hostel-table-container {
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
-/* View hostel container */
-.view-hostels-container {
-  text-align: center;
-  padding: 30px;
-  margin-top: 20px;
+.hostel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  table-layout: fixed; /* Ensures consistent column width */
 }
 
-/* Grid layout */
-.hostel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
-  justify-content: center;
-  padding: 20px;
+.hostel-table th, .hostel-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  word-wrap: break-word;
 }
 
-/* Hostel card styling */
-.hostel-card {
-  background: white;
-  padding: 22px;
-  border-radius: 14px;
-  box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 2px solid #ddd;
+.hostel-table th {
+  background-color: #f1f1f1;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #ccc;
+  text-transform: uppercase;
+}
+
+.hostel-table td {
+  background-color: #fff;
+  color: #444;
+}
+
+.hostel-table tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+.hostel-table tr:hover td {
+  background-color: #e8f0fe;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+.status-badge.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+.status-badge.rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.hostel-table td button {
+  margin-right: 4px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.hostel-table td button:hover {
+  background-color: #1b5e20;
+}
+
+.hostel-table td button:nth-child(2) {
+  background-color: #0288d1;
+}
+.hostel-table td button:nth-child(2):hover {
+  background-color: #01579b;
+}
+
+.hostel-table td button:nth-child(3) {
+  background-color: #fbc02d;
+  color: #000;
+}
+.hostel-table td button:nth-child(3):hover {
+  background-color: #f9a825;
+}
+
+.hostel-table td button:nth-child(4) {
+  background-color: #d32f2f;
+}
+.hostel-table td button:nth-child(4):hover {
+  background-color: #b71c1c;
+}
+
+.hostel-detail-view {
+  position: fixed;  /* Fixed to viewport */
+  top: 0;
+  left: 0;
+  width: 100vw;     /* Full viewport width */
+  height: 100vh;    /* Full viewport height */
+  background-color: #fff; /* or your preferred bg color */
+  overflow-y: auto; /* Scroll if content too tall */
+  padding: 2rem;
+  z-index: 1000;    /* On top of other elements */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.back-btn {
+  align-self: flex-start;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.2s ease-in-out;
+}
+.back-btn:hover {
+  background-color: #2980b9;
+}
+
+.hostel-detail-card {
+  flex: 1; /* take remaining space */
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.hostel-detail-image-container {
+  flex: 1;
   position: relative;
 }
 
-.hostel-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0px 8px 18px rgba(0, 0, 0, 0.2);
-}
-
-/* Hostel Image Container */
-.hostel-img-container {
+.hostel-detail-image {
   width: 100%;
-  height: 190px;
-  overflow: hidden;
-  border-radius: 12px;
-  margin-bottom: 14px;
-  background: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Image Styling - Centered */
-.hostel-image {
-  width: 100%;
-  max-height: 350px;
+  height: auto;
+  border-radius: 10px;
   object-fit: cover;
-  border-radius: 10px;
-  margin: 15px auto; /* Centers the image */
-  display: block; /* Ensures it's properly centered */
+  max-height: 500px;
 }
 
-
-.no-image {
-  color: #777;
-  font-size: 14px;
+.hostel-detail-info {
+  flex: 2;
+  overflow-y: auto;
 }
 
-/* Hostel Info */
-.hostel-info h3 {
-  font-size: 22px;
-  font-weight: bold;
-  color: #222;
-  margin-bottom: 10px;
+.hostel-description, .hostel-facilities {
+  margin-top: 1rem;
 }
 
-.hostel-info p {
-  font-size: 16px;
-  color: #444;
-  margin: 6px 0;
-}
-
-/* Rent Styling */
-.hostel-info .rent {
-  font-size: 20px;
-  font-weight: bold;
-  color: #28a745;
-  background: rgba(40, 167, 69, 0.1);
-  padding: 8px 14px;
+.search-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: white;
   border-radius: 8px;
-  display: inline-block;
-  margin-top: 8px;
-  box-shadow: 0px 3px 8px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Address Styling */
-.hostel-info .address {
-  font-size: 16px;
-  color: #0056b3;
-  margin-top: 6px;
-  font-style: italic;
-  background: rgba(0, 123, 255, 0.1);
-  padding: 6px 12px;
-  border-radius: 6px;
-  display: inline-block;
-  max-width: 90%;
-  word-wrap: break-word;
-  text-align: center;
-  box-shadow: 0px 3px 8px rgba(0, 123, 255, 0.2);
+.search-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: center;
 }
 
-/* View Details Button */
-.view-details-btn {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: white;
-  padding: 14px 20px;
-  font-size: 15px;
-  font-weight: bold;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0px 4px 12px rgba(0, 91, 187, 0.2);
+.search-input,
+.search-select {
   width: 100%;
-  text-transform: uppercase;
-  margin-top: 12px;
-}
-
-.view-details-btn:hover {
-  background: linear-gradient(135deg, #0056b3, #004494);
-  transform: scale(1.08);
-}
-
-/* Hostel Detail Table */
-.hostel-detail-table {
-  width: 100%;
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Row for Details */
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  font-size: 16px;
-}
-
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-/* Titles */
-.detail-title {
-  font-weight: bold;
-  color: #333;
-}
-
-/* Facilities List */
-.facility-list {
-  list-style-type: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.facility-list li {
-  background: #007bff;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  display: inline-block;
-  margin-right: 5px;
-  margin-top: 5px;
-  font-size: 14px;
-}
-
-/* Back Button */
-/* Styles for Back to Hostels button */
-.back-btn {
-  display: inline-block;
-  background-color: #ff5733; /* Vibrant Red */
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 8px 15px;
-  border: none;
-  border-radius: 20px; /* Rounded edges */
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  text-align: center;
-  margin-top: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.back-btn:hover {
-  background-color: #d43f00; /* Darker Red on hover */
-  transform: scale(1.05); /* Slight zoom effect */
-}
-
-
-/* No hostels section */
-.no-hostels {
-  text-align: center;
-  margin: 50px auto;
-  max-width: 400px;
-  padding: 25px;
-  background: #f9f9f9;
-  border-radius: 14px;
-  box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem;
   border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
 }
 
-.no-hostels h3 {
-  font-size: 24px;
-  color: #444;
+.search-input:focus,
+.search-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-.no-hostels p {
-  font-size: 17px;
-  color: #666;
+.search-input::placeholder {
+  color: #999;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .hostel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  }
-
-  .hostel-card {
-    padding: 20px;
-  }
-
-  .hostel-info h3 {
-    font-size: 20px;
-  }
-
-  .hostel-info .rent {
-    font-size: 18px;
-    padding: 6px 12px;
-  }
-
-  .hostel-info .address {
-    font-size: 15px;
-    padding: 5px 10px;
-  }
-
-  .view-details-btn {
-    padding: 12px;
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hostel-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-
-  .hostel-card {
-    padding: 18px;
-  }
-
-  .hostel-info h3 {
-    font-size: 18px;
-  }
-
-  .hostel-info .rent {
-    font-size: 16px;
-    padding: 5px 10px;
-  }
-
-  .hostel-info .address {
-    font-size: 14px;
-    padding: 4px 8px;
-  }
-
-  .view-details-btn {
-    padding: 10px;
-    font-size: 13px;
-  }
-}
-
-
-/* Hostel Details Container */
-.hostel-details {
-  max-width: 800px;
-  margin: 30px auto;
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Hostel Name */
-.hostel-details h2 {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 15px;
-  border-bottom: 3px solid #007bff;
-  display: inline-block;
-  padding-bottom: 5px;
-}
-
-/* Image Styling */
-.hostel-image {
-  width: 100%;
-  max-height: 350px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-/* Details Box */
-.details-box {
-  width: 100%;
-  background: #f9f9f9;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  margin-top: 15px;
-}
-
-/* Hostel Info Section */
-.hostel-info {
-  font-size: 16px;
-  color: #444;
-  margin-top: 10px;
-}
-
-.hostel-info p {
-  margin: 8px 0;
-  line-height: 1.5;
-  font-weight: 500;
-}
-
-/* Facilities Section */
-.hostel-facilities {
-  margin-top: 20px;
-  text-align: left;
-  background: #eef5ff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 3px 6px rgba(0, 123, 255, 0.1);
-}
-
-.hostel-facilities h3 {
-  font-size: 18px;
-  font-weight: bold;
-  color: #0056b3;
-  margin-bottom: 10px;
-}
-
-.hostel-facilities ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.hostel-facilities li {
-  background: white;
-  padding: 8px;
-  border-radius: 6px;
-  margin: 5px 0;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Rent & Address Box */
-.rent-address-box {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
-  margin-top: 10px;
-}
-
-.rent-address-box p {
-  font-size: 16px;
-  font-weight: bold;
-  color: #007bff;
-}
-
-/* Back Button */
-.back-btn {
-  background: linear-gradient(135deg, #dc3545, #b30021);
-  color: white;
-  padding: 12px 18px;
-  font-size: 14px;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
+.search-select {
+  background-color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0px 4px 10px rgba(187, 0, 33, 0.2);
-  width: 100%;
-  margin-top: 20px;
-  text-transform: uppercase;
 }
 
-.back-btn:hover {
-  background: linear-gradient(135deg, #b30021, #92001b);
-  transform: scale(1.05);
-}
-
-/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .hostel-details {
-    padding: 20px;
-    max-width: 90%;
-  }
-
-  .hostel-facilities h3 {
-    font-size: 16px;
-  }
-
-  .back-btn {
-    font-size: 13px;
-    padding: 10px 15px;
-  }
-
-  .rent-address-box {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  .search-filters {
+    grid-template-columns: 1fr;
   }
 }
