@@ -25,6 +25,7 @@ const db = mysql.createConnection({
     queueLimit: 0
 });
 
+
 // Connect to MySQL with better error handling
 db.connect((err) => {
     if (err) {
@@ -1351,3 +1352,6 @@ app.put('/update-student/:student_id', (req, res) => {
         });
     });
 });
+
+
+//add code for pull request or comparing previous code 
