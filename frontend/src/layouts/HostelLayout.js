@@ -1,6 +1,7 @@
 import React from 'react';
-import OwnerHeader from '../dashboard/OwnerHeader';
-import HostelNav from '../dashboard/HostelNav';
+import OwnerHeader from '../dashboard/admin/AdminHeader';
+
+import HostelNav from '../common/HostelNav';
 import '../styles/HostelLayout.css';
 
 const HostelLayout = ({ children }) => {

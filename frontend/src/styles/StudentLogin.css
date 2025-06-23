@@ -119,3 +119,162 @@ body {
     transform: scale(1.02);
   }
   
+  .forgot-password-btn {
+    background: linear-gradient(90deg, #0056b3 0%, #94008a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 18px;
+    margin-left: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 2px 8px rgba(0,86,179,0.08);
+    outline: none;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .forgot-password-btn:hover,
+  .forgot-password-btn:focus {
+    background: linear-gradient(90deg, #94008a 0%, #0056b3 100%);
+    transform: translateY(-2px) scale(1.05);
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .register-btn {
+    background: linear-gradient(90deg, #0056b3 0%, #94008a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 18px;
+    margin-left: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 2px 8px rgba(0,86,179,0.08);
+    outline: none;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .register-btn:hover,
+  .register-btn:focus {
+    background: linear-gradient(90deg, #94008a 0%, #0056b3 100%);
+    transform: translateY(-2px) scale(1.05);
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .back-btn {
+    background: #fff;
+    color: #0056b3;
+    border: 2px solid #0056b3;
+    border-radius: 5px;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
+    outline: none;
+    display: block;
+    width: 100%;
+  }
+  
+  .back-btn:hover,
+  .back-btn:focus {
+    background: #0056b3;
+    color: #fff;
+    border-color: #94008a;
+    transform: translateY(-2px) scale(1.03);
+  }
+  
+  /* Reset it here - link style with underline animation */
+  .reset-link-btn {
+    background: none;
+    color: #0056b3;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    margin-left: 8px;
+    cursor: pointer;
+    position: relative;
+    padding: 0 2px;
+    transition: color 0.2s;
+    outline: none;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .reset-link-btn::after {
+    content: "";
+    display: block;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #0056b3 0%, #94008a 100%);
+    transition: width 0.3s;
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+  }
+  .reset-link-btn:hover,
+  .reset-link-btn:focus {
+    color: #94008a;
+  }
+  .reset-link-btn:hover::after,
+  .reset-link-btn:focus::after {
+    width: 100%;
+  }
+  
+  /* Register here - bold, gradient, pill-shaped */
+  .register-btn {
+    background: linear-gradient(90deg, #0056b3 0%, #94008a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 28px;
+    margin-left: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,86,179,0.08);
+    outline: none;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .register-btn:hover,
+  .register-btn:focus {
+    background: linear-gradient(90deg, #94008a 0%, #0056b3 100%);
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 4px 16px rgba(148,0,138,0.12);
+  }
+  
+  /* Back to Website - outlined, pill-shaped, soft hover */
+  .back-btn {
+    background: #fff;
+    color: #0056b3;
+    border: 2px solid #0056b3;
+    border-radius: 999px;
+    padding: 10px 28px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 22px;
+    transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
+    outline: none;
+    display: block;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,86,179,0.04);
+  }
+  .back-btn:hover,
+  .back-btn:focus {
+    background: #0056b3;
+    color: #fff;
+    border-color: #94008a;
+    transform: translateY(-2px) scale(1.03);
+  }
+  

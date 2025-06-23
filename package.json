@@ -2,12 +2,13 @@
   "devDependencies": {
     "concurrently": "^9.1.2"
   },
-
   "scripts": {
-  "start": "concurrently \"npm run server\" \"npm run client\"",
-  "server": "cd back && node server.js",
-  "client": "cd frontend && npm start"
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd back && node server.js",
+    "client": "cd frontend && npm start"
+  },
+  "dependencies": {
+    "@emailjs/browser": "^4.4.1",
+    "react-toastify": "^11.0.5"
+  }
 }
-
-}
-

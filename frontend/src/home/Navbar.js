@@ -7,9 +7,9 @@ const NavbarEnhanced = () => {
     <header className="navbar-enhanced">
       {/* Logo Section */}
       <div className="navbar-logo">
-        <img src="image.png" alt="Hostel Hub Logo" />
-        <span>Hostel Hub</span>
+        <h1 className="logo-text">HostelHub</h1>
       </div>
+      
 
       {/* Navigation Links */}
       <nav>

@@ -4,7 +4,78 @@
     background-color: #333; /* Dark background */
     color: #ffffff; /* White text */
     position: relative; /* Ensure footer is positioned correctly */
-    bottom: 0; /* Stick to the bottom of the page */
+    bottom: 0; /* Stick to the bottom of the page *//* Footer Styles */
+    .footer {
+      width: 100%;
+      background-color: #1c1c1c; /* Deeper dark for contrast */
+      color: #ffffff;
+      position: relative;
+      bottom: 0;
+      padding: 10px 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .marquee {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    
+    .marquee p {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 18s linear infinite;
+      font-size: 1em;
+      margin: 0;
+    }
+    
+    @keyframes marquee {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+    
+    /* Email Link */
+    .email-link {
+      color: #ffcc00;
+      margin-left: 5px;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .email-link:hover {
+      color: #ffa500;
+      text-decoration: underline;
+    }
+    
+    /* Email Icon Styling */
+    .email-icon {
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .marquee p {
+        font-size: 0.9em;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .marquee p {
+        font-size: 0.8em;
+      }
+    
+      .email-icon {
+        display: none; /* Hide icon on very small screens for clarity */
+      }
+    }
+    
     padding: 10px 0; /* Padding around the content */
     overflow: hidden; /* Hide the overflow */
 }

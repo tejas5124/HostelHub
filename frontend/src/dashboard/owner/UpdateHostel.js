@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import HostelLayout from '../layouts/HostelLayout';
-import '../styles/ViewHostels.css';
-import OwnerHeader from './OwnerHeader';
-import HostelNav from './HostelNav';
+import HostelLayout from '../../layouts/HostelLayout';
+import '../../styles/ViewHostels.css';
+import DashboardHeader from '../admin/AdminHeader';
+
+
 import { useNavigate } from 'react-router-dom';
 
 const UpdateHostel = () => {
@@ -190,8 +191,7 @@ const UpdateHostel = () => {
 
   return (
     <HostelLayout>
-      <OwnerHeader />
-      <HostelNav />
+      <DashboardHeader role="owner" />
       <div className="view-hostels-container">
         <div className="page-header">
           <h1>🏢</h1>

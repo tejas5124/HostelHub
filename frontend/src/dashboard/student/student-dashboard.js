@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import '../styles/student-dashboard.css';
+import '../../styles/student-dashboard.css';
+import DashboardHeader from '../admin/AdminHeader';
+import Profile from '../../common/Profile';
 
 const StudentDashboard = () => {
     const [hostels, setHostels] = useState([]);
@@ -264,55 +266,26 @@ const StudentDashboard = () => {
 
     return (
         <div className="dashboard">
-            <header className="dashboard-header">
+            <div className="dashboard-header">
+                <DashboardHeader role="student" />
                 <div className="logo" onClick={() => navigate('/student-dashboard')} style={{ cursor: 'pointer' }}>
-                    <img src="/image.png" alt="HostelHub Logo" className="logo-img" />
                     <h1>HostelHub</h1>
                 </div>
-                <div className="header-right">
-                    {studentDetails ? (
-                        <div className="student-profile">
-                            <div className="student-info">
-                                <span className="student-name">Welcome, {studentDetails.name || 'Student'}</span>
-                                <span className="student-email">{studentDetails.email || ''}</span>
-                            </div>
-                            <div className="profile-actions">
-                                <button className="profile-btn" onClick={() => navigate('/profile')}>
-                                    <span className="button-icon">👤</span>
-                                    Profile
-                                </button>
-                                <button onClick={handleLogout} className="logout-btn">
-                                    <span className="button-icon">🚪</span>
-                                    Logout
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="profile-actions">
-                            <button onClick={handleLogout} className="logout-btn">
-                                <span className="button-icon">🚪</span>
-                                Logout
-                            </button>
-                        </div>
-                    )}
+                <div className="nav-menu">
+                    <button className="nav-button" onClick={() => setSelectedHostel(null)}>
+                        <span className="button-icon">🏠</span>
+                        Browse Hostels
+                    </button>
+                    <button className="nav-button" onClick={() => navigate('/my-bookings')}>
+                        <span className="button-icon">📚</span>
+                        My Bookings
+                    </button>
+                    <button className="nav-button" onClick={() => navigate('/profile')}>
+                        <span className="button-icon">👤</span>
+                        Profile
+                    </button>
                 </div>
-            </header>
-
-            <div className="nav-menu">
-                <button className="nav-button" onClick={() => setSelectedHostel(null)}>
-                    <span className="button-icon">🏠</span>
-                    Browse Hostels
-                </button>
-                <button className="nav-button" onClick={() => navigate('/my-bookings')}>
-                    <span className="button-icon">📚</span>
-                    My Bookings
-                </button>
-                <button className="nav-button" onClick={() => navigate('/profile')}>
-                    <span className="button-icon">👤</span>
-                    Profile
-                </button>
             </div>
-
             <div className="main-content">
                 {/* Statistics Cards */}
                 <div className="stats-container">

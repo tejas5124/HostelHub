@@ -1,3 +1,150 @@
+// // server.js (clean version after refactoring)
+// const express = require('express');
+// const mysql = require('mysql2');
+// const session = require('express-session');
+// const cors = require('cors');
+// const bodyParser = require('body-parser');
+// const path = require('path');
+// const fs = require('fs');
+
+// const app = express();
+// const port = process.env.PORT || 5000;
+
+// // Create uploads directory if it doesn't exist
+// const uploadsDir = path.join(__dirname, 'uploads');
+// if (!fs.existsSync(uploadsDir)) {
+//   fs.mkdirSync(uploadsDir, { recursive: true });
+// }
+
+// // Middleware
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+
+// app.use(bodyParser.json());
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// app.use(session({
+//   secret: 'your_secret_key',
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: false }
+// }));
+
+// // MySQL database connection
+// const db = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'Balaji',
+//   database: 'hostel',
+//   connectTimeout: 10000,
+//   waitForConnections: true,
+//   connectionLimit: 10,
+//   queueLimit: 0
+// });
+
+// // Attach DB to app locals
+// app.locals.db = db;
+
+// // Connect to MySQL
+// db.connect((err) => {
+//   if (err) {
+//     console.error('Database connection failed:', err.stack);
+//     return;
+//   }
+//   console.log('Connected to MySQL database successfully.');
+// });
+
+// // Reconnection handler
+// db.on('error', (err) => {
+//   console.error('Database error:', err);
+//   if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+//     db.connect((err) => {
+//       if (err) console.error('Reconnection failed:', err);
+//       else console.log('Reconnected to database successfully.');
+//     });
+//   } else {
+//     throw err;
+//   }
+// });
+
+// // Route files
+// const studentRoutes = require('./student_routes');
+// const ownerRoutes = require('./owner_routes');
+// const adminRoutes = require('./admin_routes');
+// const hostelRoutes = require('./hostel_routes'); // <-- ADD THIS
+
+
+// // Mount routes
+// app.use('/api/students', studentRoutes);
+// app.use('/api/owners', ownerRoutes);
+// app.use('/api/admins', adminRoutes);
+// app.use('/api/hostels', hostelRoutes); // <-- ADD THIS
+
+
+// // Start server
+// const server = app.listen(port, () => {
+//   console.log(`Server running on http://localhost:${port}`);
+// });
+
+// server.on('error', (err) => {
+//   if (err.code === 'EADDRINUSE') {
+//     console.error(`Port ${port} is already in use.`);
+//     process.exit(1);
+//   } else {
+//     console.error('Server error:', err);
+//   }
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
@@ -7,11 +154,30 @@ const session = require('express-session');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 // Create the Express app
 const app = express();
 const port = process.env.PORT || 5000;
 const saltRounds = 10; // Number of salt rounds for bcrypt hashing
+
+// Configure CORS
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Configure nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'help.hostelhub@gmail.com', // Replace with your email
+    pass: 'slkd hcnv pgns cxur'     // Replace with your app password
+  }
+});
 
 // MySQL database connection
 const db = mysql.createConnection({
@@ -53,7 +219,6 @@ db.on('error', (err) => {
 });
 
 // Middleware
-app.use(cors());
 app.use(bodyParser.json());
 
 // Session middleware
@@ -505,7 +670,14 @@ app.get('/api/hostels', (req, res) => {
 
 
 app.get('/api/students', (req, res) => {
-  const sql = 'SELECT * FROM student';
+  const sql = `
+    SELECT 
+      s.student_id, s.name, s.email, s.phone_number, s.address, s.date_of_birth, s.gender,
+      h.name AS hostel_name
+    FROM student s
+    LEFT JOIN bookings b ON s.student_id = b.student_id AND b.booking_status = 'approved'
+    LEFT JOIN hosteldetails h ON b.hostel_id = h.hostel_id
+  `;
   db.query(sql, (err, results) => {
     if (err) throw err;
     res.json(results);
@@ -1353,5 +1525,360 @@ app.put('/update-student/:student_id', (req, res) => {
     });
 });
 
+// Update owner profile
+app.put('/update-owner/:owner_id', (req, res) => {
+    const ownerId = req.params.owner_id;
+    const { phone_number } = req.body;
+
+    // Validate phone number
+    if (!phone_number || !/^\d{10}$/.test(phone_number)) {
+        return res.status(400).json({ 
+            error: 'Invalid phone number. Please provide a valid 10-digit phone number.' 
+        });
+    }
+
+    // First check if owner exists
+    const checkQuery = 'SELECT owner_id FROM hostelowner WHERE owner_id = ?';
+    db.query(checkQuery, [ownerId], (err, results) => {
+        if (err) {
+            console.error('Error checking owner:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Owner not found' });
+        }
+
+        // Update the phone number
+        const updateQuery = 'UPDATE hostelowner SET phone_number = ? WHERE owner_id = ?';
+        db.query(updateQuery, [phone_number, ownerId], (err, result) => {
+            if (err) {
+                console.error('Error updating owner:', err);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(400).json({ error: 'Failed to update phone number' });
+            }
+
+            // Fetch updated owner details
+            const fetchQuery = 'SELECT * FROM hostelowner WHERE owner_id = ?';
+            db.query(fetchQuery, [ownerId], (err, updatedResults) => {
+                if (err) {
+                    console.error('Error fetching updated owner:', err);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+
+                res.json(updatedResults[0]);
+            });
+        });
+    });
+});
+
+// Route to handle forgot password request for students
+app.post('/forgot-password-student', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    // Check if email exists
+    const query = 'SELECT * FROM student WHERE email = ?';
+    db.query(query, [email], async (err, results) => {
+      if (err) {
+        console.error('Error querying database:', err);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'Email not found' });
+      }
+
+      const userName = results[0].name || '';
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = new Date(Date.now() + 3600000); // Token valid for 1 hour
+
+      // Store reset token in database
+      const updateQuery = 'UPDATE student SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
+      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err) => {
+        if (err) {
+          console.error('Error updating reset token:', err);
+          return res.status(500).json({ message: 'Internal Server Error' });
+        }
+
+        // Send reset email
+        const resetUrl = `http://localhost:3000/reset-password-student/${resetToken}`;
+        const mailOptions = {
+          from: 'balajimore9193@gmail.com',
+          to: email,
+          subject: 'HostelHub Password Reset Request',
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #222;">
+              <h2 style="color: #0056b3;">HostelHub Password Reset</h2>
+              <p>Hi${userName ? ' ' + userName : ''},</p>
+              <p>We received a request to reset your password for your <b>HostelHub</b> account.</p>
+              <p>
+                <a href="${resetUrl}" style="background: #0056b3; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                  Reset Password
+                </a>
+              </p>
+              <p>If you did not request this, you can safely ignore this email.</p>
+              <p>This link will expire in 1 hour.</p>
+              <br>
+              <p>Thanks,<br>The HostelHub Team</p>
+              <hr>
+              <small>
+                This email was sent to you because you requested a password reset on HostelHub.<br>
+                If you have any questions, contact us at help.hostelhub@gmail.com
+              </small>
+            </div>
+          `
+        };
+
+        try {
+          await transporter.sendMail(mailOptions);
+          res.status(200).json({ message: 'Password reset email sent' });
+        } catch (error) {
+          console.error('Error sending email:', error);
+          res.status(500).json({ message: 'Error sending reset email' });
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error in forgot password:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Route to handle forgot password request for owners
+app.post('/forgot-password-owner', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    // Check if email exists
+    const query = 'SELECT * FROM hostelowner WHERE email = ?';
+    db.query(query, [email], async (err, results) => {
+      if (err) {
+        console.error('Error querying database:', err);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'Email not found' });
+      }
+
+      const ownerName = results[0].name || '';
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = new Date(Date.now() + 3600000); // Token valid for 1 hour
+
+      // Store reset token in database
+      const updateQuery = 'UPDATE hostelowner SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
+      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err) => {
+        if (err) {
+          console.error('Error updating reset token:', err);
+          return res.status(500).json({ message: 'Internal Server Error' });
+        }
+
+        // Send reset email
+        const resetUrl = `http://localhost:3000/reset-password-owner/${resetToken}`;
+        const mailOptions = {
+          from: 'balajimore9193@gmail.com',
+          to: email,
+          subject: 'HostelHub Password Reset Request',
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #222;">
+              <h2 style="color: #0056b3;">HostelHub Password Reset</h2>
+              <p>Hi${ownerName ? ' ' + ownerName : ''},</p>
+              <p>We received a request to reset your password for your <b>HostelHub</b> account.</p>
+              <p>
+                <a href="${resetUrl}" style="background: #0056b3; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                  Reset Password
+                </a>
+              </p>
+              <p>If you did not request this, you can safely ignore this email.</p>
+              <p>This link will expire in 1 hour.</p>
+              <br>
+              <p>Thanks,<br>The HostelHub Team</p>
+              <hr>
+              <small>
+                This email was sent to you because you requested a password reset on HostelHub.<br>
+                If you have any questions, contact us at support@hostelhub.com
+              </small>
+            </div>
+          `
+        };
+
+        try {
+          await transporter.sendMail(mailOptions);
+          res.status(200).json({ message: 'Password reset email sent' });
+        } catch (error) {
+          console.error('Error sending email:', error);
+          res.status(500).json({ message: 'Error sending reset email' });
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error in forgot password:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Route to handle password reset for students
+app.post('/reset-password-student', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    // Find user with valid reset token
+    const query = 'SELECT * FROM student WHERE reset_token = ? AND reset_token_expiry > NOW()';
+    db.query(query, [token], async (err, results) => {
+      if (err) {
+        console.error('Error querying database:', err);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+
+      // Hash new password
+      const hashedPassword = await hashPassword(newPassword);
+
+      // Update password and clear reset token
+      const updateQuery = 'UPDATE student SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
+      db.query(updateQuery, [hashedPassword, token], (err) => {
+        if (err) {
+          console.error('Error updating password:', err);
+          return res.status(500).json({ message: 'Internal Server Error' });
+        }
+
+        res.status(200).json({ message: 'Password reset successful' });
+      });
+    });
+  } catch (error) {
+    console.error('Error in password reset:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Route to handle password reset for owners
+app.post('/reset-password-owner', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    // Find user with valid reset token
+    const query = 'SELECT * FROM hostelowner WHERE reset_token = ? AND reset_token_expiry > NOW()';
+    db.query(query, [token], async (err, results) => {
+      if (err) {
+        console.error('Error querying database:', err);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+
+      // Hash new password
+      const hashedPassword = await hashPassword(newPassword);
+
+      // Update password and clear reset token
+      const updateQuery = 'UPDATE hostelowner SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
+      db.query(updateQuery, [hashedPassword, token], (err) => {
+        if (err) {
+          console.error('Error updating password:', err);
+          return res.status(500).json({ message: 'Internal Server Error' });
+        }
+
+        res.status(200).json({ message: 'Password reset successful' });
+      });
+    });
+  } catch (error) {
+    console.error('Error in password reset:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Update student profile (email and phone)
+app.put('/student-update/:student_id', (req, res) => {
+  const studentId = req.params.student_id;
+  const { email, phone_number } = req.body;
+
+  if (!email || !phone_number) {
+    return res.status(400).json({ message: 'Email and phone number are required.' });
+  }
+
+  const updateQuery = 'UPDATE student SET email = ?, phone_number = ? WHERE student_id = ?';
+  db.query(updateQuery, [email, phone_number, studentId], (err, result) => {
+    if (err) {
+      console.error('Error updating student:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    res.status(200).json({ message: 'Profile updated successfully' });
+  });
+});
+
+// Update owner profile (email and phone)
+app.put('/owner-update/:owner_id', (req, res) => {
+  const ownerId = req.params.owner_id;
+  const { email, phone_number } = req.body;
+
+  if (!email || !phone_number) {
+    return res.status(400).json({ message: 'Email and phone number are required.' });
+  }
+
+  const updateQuery = 'UPDATE hostelowner SET email = ?, phone_number = ? WHERE owner_id = ?';
+  db.query(updateQuery, [email, phone_number, ownerId], (err, result) => {
+    if (err) {
+      console.error('Error updating owner:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Owner not found' });
+    }
+    res.status(200).json({ message: 'Profile updated successfully' });
+  });
+});
+
+// Update admin profile (email and phone)
+app.put('/admin-update/:admin_id', (req, res) => {
+  const adminId = req.params.admin_id;
+  const { email, phone_number } = req.body;
+
+  if (!email || !phone_number) {
+    return res.status(400).json({ message: 'Email and phone number are required.' });
+  }
+
+  const updateQuery = 'UPDATE collegeadministration SET email = ?, phone_number = ? WHERE admin_id = ?';
+  db.query(updateQuery, [email, phone_number, adminId], (err, result) => {
+    if (err) {
+      console.error('Error updating admin:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+    res.status(200).json({ message: 'Profile updated successfully' });
+  });
+});
 
 //add code for pull request or comparing previous code 

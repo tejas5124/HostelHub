@@ -1,6 +1,6 @@
 import React from 'react';
 import '../styles/Homepage.css'; // Ensure styles are updated for new design
-import Navbar from './Navbar';
+import NavbarEnhanced from './Navbar';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ const HomePage = () => {
 
   return (
     <div className="homepage-container">
-      <Navbar />
+      <NavbarEnhanced />
       
       {/* Hero Section */}
       <main className="hero">

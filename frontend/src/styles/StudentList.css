@@ -1,89 +1,141 @@
 /* Container styling */
 .student-list-container {
-    padding: 20px;
+    padding: 2.5rem 1rem;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 2rem auto;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
-    background: #f9f9f9; /* Light gray background */
   }
   
   /* Heading styling */
   .student-list-container h1 {
+    font-size: 2rem;
+    color: #1e3c72;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
     text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 2.5em; /* Larger heading */
-    font-weight: 600; /* Semi-bold */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   }
   
   /* Table styling */
   .student-list-container table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
-    background: #fff; /* White background for the table */
-    border-radius: 8px; /* Rounded corners for the table */
-    overflow: hidden; /* Ensure the border radius applies to the table */
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(30,60,114,0.06);
   }
   
   /* Table header styling */
-  .student-list-container th {
-    background: linear-gradient(135deg, #4CAF50, #45a049); /* Gradient green background */
-    color: white;
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 2px solid #ddd;
-    font-weight: bold;
+  .student-list-container thead th {
+    background: #1e3c72;
+    color: #fff;
+    padding: 1rem 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.98rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
   }
   
   /* Table cell styling */
-  .student-list-container td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
+  .student-list-container tbody td {
+    padding: 0.9rem 0.7rem;
+    border-bottom: 1px solid #f0f0f0;
     color: #333;
+    font-size: 1.01rem;
   }
   
   /* Table row styling */
-  .student-list-container tr:nth-child(even) {
-    background-color: #f9f9f9;
+  .student-list-container tr {
+    transition: background 0.18s;
   }
   
   /* Hover effect for rows */
   .student-list-container tr:hover {
-    background-color: #f1f1f1;
-    cursor: pointer; /* Pointer cursor on hover */
+    background: #f5f7fa;
   }
   
   /* Loading and error message styling */
   .student-list-container p {
     text-align: center;
-    font-size: 18px;
-    color: #555;
+    font-size: 1.1rem;
+    color: #1e3c72;
+    margin-top: 2rem;
   }
   
-  /* Loading spinner */
-  .loading::before {
-    content: '';
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 3px solid #333;
-    border-radius: 50%;
-    border-top: 3px solid transparent;
-    animation: spin 1s linear infinite;
+  .filters-row {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  .student-search-input {
+    padding: 0.6rem 1.2rem;
+    border: 1.5px solid #b3c6ff;
+    border-radius: 7px;
+    font-size: 1.05rem;
+    min-width: 220px;
+    background: #f7faff;
+    transition: border 0.2s;
   }
   
-  /* Error message styling */
-  .error {
-    color: #d9534f; /* Bootstrap danger color */
-    font-weight: bold; /* Bold error text */
+  .student-search-input:focus {
+    border: 1.5px solid #1e3c72;
+    background: #fff;
+  }
+  
+  .filters-row select {
+    padding: 0.6rem 1.2rem;
+    border: 1.5px solid #b3c6ff;
+    border-radius: 7px;
+    font-size: 1.05rem;
+    background: #f7faff;
+    transition: border 0.2s;
+  }
+  
+  .filters-row select:focus {
+    border: 1.5px solid #1e3c72;
+    background: #fff;
+  }
+  
+  @media (max-width: 900px) {
+    .student-list-container {
+      padding: 1rem 0.2rem;
+      max-width: 99vw;
+    }
+    table, thead, tbody, th, td, tr {
+      font-size: 0.97rem;
+    }
+    .filters-row {
+      gap: 0.7rem;
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .student-list-container {
+      padding: 0.5rem 0.1rem;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+    }
+    .student-list-container h1 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .filters-row {
+      margin-bottom: 1rem;
+    }
+    table, thead, tbody, th, td, tr {
+      font-size: 0.93rem;
+    }
   }
   

@@ -8,7 +8,6 @@ import adminImage from '../images/admin.jpeg';
 
   
 
-
 import { 
   FaUserGraduate, FaBuilding, FaUserTie, FaCheck, FaArrowRight, FaSearch, FaCalendarAlt,
   FaChartLine, FaUsers, FaClipboardList, FaChartPie, FaStar, FaFileAlt, FaChartBar,
@@ -30,7 +29,7 @@ const Shc = () => {
           </p>
           <div className="hero-stats">
             <div className="stat-item">
-              <span className="stat-number">500+</span>
+              <span className="stat-number">50+</span>
               <span className="stat-label">Hostels</span>
             </div>
             <div className="stat-item">
@@ -38,7 +37,7 @@ const Shc = () => {
               <span className="stat-label">Students</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">50+</span>
+              <span className="stat-number">20+</span>
               <span className="stat-label">Colleges</span>
             </div>
           </div>

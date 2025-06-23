@@ -59,10 +59,14 @@ function OwnerLogin() {
     }
   };
 
+  const handleForgotPassword = () => {
+    navigate('/forgot-password-owner');
+  };
+
   const handleRegistration = () => {
     Swal.fire({
       icon: 'info',
-      title: 'Don’t have an account?',
+      title: "Don't have an account?",
       text: 'Register now!',
       showConfirmButton: true,
     }).then(() => navigate('/owner-register'));
@@ -103,9 +107,26 @@ function OwnerLogin() {
         <button type="submit" className="login-button">🚀 Login</button>
 
         <div className="info">
-          <p>Don't have an account? <button onClick={handleRegistration} className="link-button">Register here</button></p>
+          <p>Forgot your password?
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              className="reset-link-btn"
+            >
+              Reset it here
+            </button>
+          </p>
+          <p>Don't have an account?
+            <button
+              type="button"
+              onClick={handleRegistration}
+              className="register-btn"
+            >
+              Register here
+            </button>
+          </p>
         </div>
-        <button type="button" className="back-button" onClick={handleLoginClick}>⬅️ Back to Website</button>
+        <button type="button" className="back-btn" onClick={handleLoginClick}>⬅️ Back to Website</button>
       </form>
     </div>
   );

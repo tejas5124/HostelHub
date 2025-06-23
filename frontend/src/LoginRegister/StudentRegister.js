@@ -24,15 +24,15 @@ function StudentRegister() {
     
     // Name validation
     if (!student.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'Full name is required';
     } else if (student.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters long';
+      newErrors.name = 'Full name must be at least 2 characters long';
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!student.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email address is required';
     } else if (!emailRegex.test(student.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
@@ -46,7 +46,9 @@ function StudentRegister() {
     }
 
     // Confirm password validation
-    if (student.password !== student.confirmPassword) {
+    if (!student.confirmPassword) {
+      newErrors.confirmPassword = 'Confirm password is required';
+    } else if (student.password !== student.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
@@ -175,7 +177,7 @@ function StudentRegister() {
   return (
     <div className="register-page">
       <div className="register-card">
-        <h2>🎓 Student Registration</h2>
+        <h2 className="card-title">🎓 Student Registration</h2>
         
         <div className="progress-bar">
           <div 
@@ -184,119 +186,138 @@ function StudentRegister() {
           ></div>
         </div>
         
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <input
-              type="text"
-              name="name"
-              value={student.name}
-              onChange={handleChange}
-              placeholder="👤 Full Name"
-              className={errors.name ? 'error' : ''}
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
+        <form onSubmit={handleSubmit} className="register-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="name">Full Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={student.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                className={errors.name ? 'error' : ''}
+              />
+              {errors.name && <span className="error-message">{errors.name}</span>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={student.email}
+                onChange={handleChange}
+                placeholder="john.doe@example.com"
+                className={errors.email ? 'error' : ''}
+              />
+              {errors.email && <span className="error-message">{errors.email}</span>}
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={student.password}
+                onChange={handleChange}
+                placeholder="Minimum 8 characters, strong password"
+                className={errors.password ? 'error' : ''}
+              />
+              {errors.password && <span className="error-message">{errors.password}</span>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={student.confirmPassword}
+                onChange={handleChange}
+                placeholder="Re-enter your password"
+                className={errors.confirmPassword ? 'error' : ''}
+              />
+              {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="date_of_birth">Date of Birth</label>
+              <input
+                type="date"
+                id="date_of_birth"
+                name="date_of_birth"
+                value={student.date_of_birth}
+                onChange={handleChange}
+                className={errors.date_of_birth ? 'error' : ''}
+              />
+              {errors.date_of_birth && <span className="error-message">{errors.date_of_birth}</span>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone_number">Phone Number</label>
+              <input
+                type="tel"
+                id="phone_number"
+                name="phone_number"
+                value={student.phone_number}
+                onChange={handleChange}
+                placeholder="e.g., 9876543210"
+                className={errors.phone_number ? 'error' : ''}
+              />
+              {errors.phone_number && <span className="error-message">{errors.phone_number}</span>}
+            </div>
           </div>
 
           <div className="form-group">
-            <input
-              type="email"
-              name="email"
-              value={student.email}
-              onChange={handleChange}
-              placeholder="📧 Email"
-              className={errors.email ? 'error' : ''}
-            />
-            {errors.email && <span className="error-message">{errors.email}</span>}
-          </div>
-
-          <div className="form-group">
-            <input
-              type="password"
-              name="password"
-              value={student.password}
-              onChange={handleChange}
-              placeholder="🔒 Password"
-              className={errors.password ? 'error' : ''}
-            />
-            {errors.password && <span className="error-message">{errors.password}</span>}
-          </div>
-
-          <div className="form-group">
-            <input
-              type="password"
-              name="confirmPassword"
-              value={student.confirmPassword}
-              onChange={handleChange}
-              placeholder="🔒 Confirm Password"
-              className={errors.confirmPassword ? 'error' : ''}
-            />
-            {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-          </div>
-
-          <div className="form-group">
-            <input
-              type="date"
-              name="date_of_birth"
-              value={student.date_of_birth}
-              onChange={handleChange}
-              className={errors.date_of_birth ? 'error' : ''}
-            />
-            {errors.date_of_birth && <span className="error-message">{errors.date_of_birth}</span>}
-          </div>
-
-          <div className="form-group">
+            <label htmlFor="gender">Gender</label>
             <select
+              id="gender"
               name="gender"
               value={student.gender}
               onChange={handleChange}
               className={errors.gender ? 'error' : ''}
             >
-              <option value="">⚥ Select Gender</option>
-              <option value="Male">♂️ Male</option>
-              <option value="Female">♀️ Female</option>
-              <option value="Other">⚧ Other</option>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
             {errors.gender && <span className="error-message">{errors.gender}</span>}
           </div>
 
           <div className="form-group">
-            <input
-              type="tel"
-              name="phone_number"
-              value={student.phone_number}
-              onChange={handleChange}
-              placeholder="📞 Phone Number"
-              className={errors.phone_number ? 'error' : ''}
-            />
-            {errors.phone_number && <span className="error-message">{errors.phone_number}</span>}
-          </div>
-
-          <div className="form-group">
+            <label htmlFor="address">Address</label>
             <textarea
+              id="address"
               name="address"
               value={student.address}
               onChange={handleChange}
-              placeholder="📍 Address"
+              placeholder="Your full address"
+              rows="3"
               className={errors.address ? 'error' : ''}
             ></textarea>
             {errors.address && <span className="error-message">{errors.address}</span>}
           </div>
 
-          <button 
-            type="submit" 
-            className="register-btn"
-            disabled={loading}
-          >
-            {loading ? '⏳ Registering...' : '📝 Register'}
+          <button type="submit" className="register-submit-btn" disabled={loading}>
+            {loading ? 'Registering...' : 'Register Account'}
           </button>
         </form>
 
-        <p className="switch-page">
-          Already have an account?{' '}
-          <span onClick={() => navigate('/student-login')} className="link-text">
+        <div className="switch-page">
+          Already Registered? 
+          <button type="button" onClick={() => navigate('/student-login')} className="login-redirect-btn">
             Login here
-          </span>
-        </p>
+          </button>
+        </div>
       </div>
     </div>
   );

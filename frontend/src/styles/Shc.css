@@ -35,7 +35,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background-image: url('https://images.unsplash.com/photo-1560185007-5f0bb1866cab?ixlib=rb-4.0.3');
+  background-image: url('D:\MERN PROJECTS\Hostel management Project\harry\frontend\src\images\bg.jpeg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -134,11 +134,13 @@
 
 .stat-label {
   font-size: 1.2rem;
-  color:#ffffff;
+  color: #321004; /* Light shade for better visibility */
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-weight: 500;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6); /* Improves visibility on light or complex backgrounds */
 }
+
 
 /* Role Selection Section */
 .role-selection {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/AdminDashboard.css';
+import '../../styles/AdminDashboard.css';
 import ViewHostels from './view_hostel_admin';
 import ApproveHostel from './ApproveHostel';
 import ViewStudents from './ViewStudents';
 import AdminHeader from './AdminHeader';
+import Profile from '../../common/Profile';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -103,6 +104,8 @@ function AdminDashboard() {
           </div>
         </div>
       </div>
+
+     
     </div>
   );
 }

@@ -1,19 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import HostelLayout from '../layouts/HostelLayout';
-import '../styles/ViewHostels.css';
-import OwnerHeader from './OwnerHeader';
-import HostelNav from './HostelNav';
+import React, { useState, useEffect } from "react";
+import HostelLayout from '../../layouts/HostelLayout';
+import '../../styles/ViewHostels.css';
+import Swal from "sweetalert2";
+import DashboardHeader from './AdminHeader';
 
-// ...imports remain the same
-
-const ViewHostels = () => {
+const RemoveHostel = () => {
   const [hostels, setHostels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedHostel, setSelectedHostel] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [searchFilters, setSearchFilters] = useState({
     name: '',
     address: '',
@@ -21,7 +16,8 @@ const ViewHostels = () => {
     rent: '',
     status: ''
   });
-  const ownerId = localStorage.getItem('owner_id');
+  const ownerId = localStorage.getItem("owner_id");
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     if (!ownerId) {
@@ -51,6 +47,55 @@ const ViewHostels = () => {
     fetchHostels();
   }, [ownerId]);
 
+  const handleDelete = async (hostelId) => {
+    if (!hostelId) {
+      Swal.fire("Warning", "Hostel ID not found", "warning");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        try {
+          const response = await fetch("http://localhost:5000/remove-hostel", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ hostel_id: hostelId }),
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to delete hostel");
+          }
+          return data;
+        } catch (error) {
+          Swal.showValidationMessage(`Request failed: ${error.message}`);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
+
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: "Deleted!",
+        text: "Hostel has been removed successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      setHostels(hostels.filter((hostel) => hostel.hostel_id !== hostelId));
+    }
+  };
+
   const handleViewImage = (imagePath) => {
     if (!imagePath) {
       Swal.fire("No Image Available", "This hostel doesn't have an image uploaded yet.", "info");
@@ -77,13 +122,8 @@ const ViewHostels = () => {
   };
 
   const filteredHostels = hostels.filter(hostel => {
-    const matchesName = hostel.name.toLowerCase().includes(searchFilters.name.toLowerCase());
-    const matchesAddress = hostel.address.toLowerCase().includes(searchFilters.address.toLowerCase());
-    const matchesGender = !searchFilters.gender || hostel.hostel_gender === searchFilters.gender;
-    const matchesRent = !searchFilters.rent || hostel.rent <= parseInt(searchFilters.rent);
-    const matchesStatus = !searchFilters.status || hostel.approval_status === searchFilters.status;
-
-    return matchesName && matchesAddress && matchesGender && matchesRent && matchesStatus;
+    if (filter === 'all') return true;
+    return hostel.approval_status === filter;
   });
 
   if (error) {
@@ -100,13 +140,12 @@ const ViewHostels = () => {
 
   return (
     <HostelLayout>
-      <OwnerHeader />
-      <HostelNav />
+      <DashboardHeader role="owner" />
       <div className="view-hostels-container">
         <div className="page-header">
           <h1>🏢</h1>
-          <h2 className="page-title">Your Hostels</h2>
-          <p className="page-subtitle">View and manage your hostel listings</p>
+          <h2 className="page-title">Remove Hostels</h2>
+          <p className="page-subtitle">View and remove your hostel listings</p>
         </div>
 
         {isLoading ? (
@@ -126,6 +165,36 @@ const ViewHostels = () => {
         ) : (
           !selectedHostel ? (
             <>
+              <div className="hostels-header">
+                <h1>Hostel Management</h1>
+                <div className="filter-buttons">
+                  <button 
+                    className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                    onClick={() => setFilter('all')}
+                  >
+                    All Hostels
+                  </button>
+                  <button 
+                    className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setFilter('pending')}
+                  >
+                    Pending
+                  </button>
+                  <button 
+                    className={`filter-btn ${filter === 'approved' ? 'active' : ''}`}
+                    onClick={() => setFilter('approved')}
+                  >
+                    Approved
+                  </button>
+                  <button 
+                    className={`filter-btn ${filter === 'rejected' ? 'active' : ''}`}
+                    onClick={() => setFilter('rejected')}
+                  >
+                    Rejected
+                  </button>
+                </div>
+              </div>
+
               <div className="search-container">
                 <div className="search-filters">
                   <input
@@ -209,6 +278,7 @@ const ViewHostels = () => {
                         <td>
                           <button onClick={() => handleViewDetails(hostel)}>View</button>
                           <button onClick={() => handleViewImage(hostel.image_path)}>Image</button>
+                          <button onClick={() => handleDelete(hostel.hostel_id)}>Remove</button>
                         </td>
                       </tr>
                     ))}
@@ -255,6 +325,10 @@ const ViewHostels = () => {
                       </div>
                     </div>
                   )}
+                  <div className="action-buttons">
+                    <button onClick={() => handleViewImage(selectedHostel.image_path)}>View Image</button>
+                    <button onClick={() => handleDelete(selectedHostel.hostel_id)}>Remove Hostel</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -265,5 +339,4 @@ const ViewHostels = () => {
   );
 };
 
-export default ViewHostels;
-
+export default RemoveHostel;

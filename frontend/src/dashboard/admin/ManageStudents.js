@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './OwnerHeader';
-import '../styles/ManageStudents.css';
+import DashboardHeader from './AdminHeader';
+import '../../styles/ManageStudents.css';
 import Swal from 'sweetalert2';
 
 const ManageStudents = () => {
@@ -186,7 +186,7 @@ const ManageStudents = () => {
     return (
         <div className="manage-students">
             <div className="dashboard-header">
-                <Header onClick={() => navigate('/main-dashboard')} />
+                <DashboardHeader role="owner" onClick={() => navigate('/main-dashboard')} />
                 <div className="logo" onClick={() => navigate('/main-dashboard')} style={{ cursor: 'pointer' }}>
                     <h1>HostelHub</h1>
                 </div>

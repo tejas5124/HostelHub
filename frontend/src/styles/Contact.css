@@ -1,0 +1,284 @@
+/* Contact Page Styles */
+.contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.contact-hero {
+  text-align: center;
+  padding: 4rem 0;
+  background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%);
+  color: white;
+  border-radius: 20px;
+  margin-bottom: 3rem;
+  box-shadow: 0 10px 30px rgba(74, 0, 224, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  z-index: 1;
+}
+
+.contact-hero h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  position: relative;
+  z-index: 2;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.contact-hero p {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0.9;
+  position: relative;
+  z-index: 2;
+}
+
+/* Contact Content */
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Contact Information Cards */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(74, 0, 224, 0.1);
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(74, 0, 224, 0.15);
+  border-color: rgba(74, 0, 224, 0.3);
+}
+
+.info-icon {
+  font-size: 2.5rem;
+  color: #4A00E0;
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.info-card:hover .info-icon {
+  transform: scale(1.1);
+}
+
+.info-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.info-card p {
+  color: #666;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+/* Contact Form */
+.contact-form-container {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(74, 0, 224, 0.1);
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.modern-input {
+  padding: 1rem;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.modern-input:focus {
+  border-color: #4A00E0;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(74, 0, 224, 0.1);
+  background: white;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%);
+  color: white;
+  padding: 1.2rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(74, 0, 224, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-btn.submitting {
+  background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+}
+
+/* Map Section */
+.map-section {
+  margin-bottom: 3rem;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Social Media Section */
+.social-media-section {
+  text-align: center;
+  padding: 3rem 0;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+}
+
+.social-media-section h2 {
+  margin-bottom: 2rem;
+  color: #333;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.social-icon {
+  font-size: 2rem;
+  color: #4A00E0;
+  transition: all 0.3s ease;
+  padding: 1rem;
+  border-radius: 50%;
+  background: #f8f9fa;
+}
+
+.social-icon:hover {
+  transform: translateY(-5px) scale(1.1);
+  color: #8E2DE2;
+  background: white;
+  box-shadow: 0 5px 15px rgba(74, 0, 224, 0.2);
+}
+
+/* Toast Notifications */
+.Toastify__toast {
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%);
+}
+
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contact-content {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .contact-hero p {
+    font-size: 1rem;
+  }
+
+  .social-icons {
+    gap: 1.5rem;
+  }
+
+  .contact-form-container {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-container {
+    padding: 1rem;
+  }
+
+  .contact-hero {
+    padding: 3rem 1rem;
+  }
+
+  .contact-hero h1 {
+    font-size: 2rem;
+  }
+
+  .info-card {
+    padding: 1.5rem;
+  }
+
+  .social-icon {
+    font-size: 1.5rem;
+    padding: 0.8rem;
+  }
+} 

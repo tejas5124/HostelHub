@@ -17,6 +17,11 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.02);
 }
 
 .logo-img {
@@ -25,9 +30,36 @@
 }
 
 .logo h1 {
-    color: white;
+    color: #fff !important;
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 2.4rem;
+    
+    font-family: 'Poppins', 'Montserrat', 'Segoe UI', Arial, sans-serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 1px 0 #222;
+    padding: 0.2rem 0.7rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(5px);
+    border: 2px solid rgba(255,255,255,0.3);
+    transition: 
+        transform 0.3s cubic-bezier(0.4, 0.2, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0.2, 0.2, 1),
+        background 0.3s cubic-bezier(0.4, 0.2, 0.2, 1),
+        color 0.3s cubic-bezier(0.4, 0.2, 0.2, 1),
+        text-shadow 0.3s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.logo h1:hover {
+    transform: scale(1.07) rotate(-1deg);
+    background: linear-gradient(90deg, #fff 30%, #b3c6ff 100%);
+    color: #1e3c72;
+    box-shadow: 0 4px 24px 0 rgba(30,60,114,0.25);
+    text-shadow: 0 4px 24px #b3c6ff, 0 1px 0 #222;
+    cursor: pointer;
 }
 
 .header-right {

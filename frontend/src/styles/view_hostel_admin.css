@@ -442,11 +442,14 @@
 
 @media (max-width: 768px) {
   .admin-view-hostel .view-hostels-container {
-    padding: 1rem;
+    min-height: 100vh;
+    background: #f8f9fa;
+    padding: 1rem 1rem; /* Reduced top-bottom padding */
   }
 
   .admin-view-hostel .hostels-header h1 {
-    font-size: 2rem;
+    font-size: 1rem;
+    text-align: center;
   }
 
   .admin-view-hostel .filter-buttons {

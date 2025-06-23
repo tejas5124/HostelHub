@@ -96,3 +96,76 @@ input {
 .back-button:hover {
   background: #5A6268;
 }
+
+.forgot-password-btn {
+  background: linear-gradient(90deg, #0056b3 0%, #94008a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 18px;
+  margin-left: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0,86,179,0.08);
+  outline: none;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.forgot-password-btn:hover,
+.forgot-password-btn:focus {
+  background: linear-gradient(90deg, #94008a 0%, #0056b3 100%);
+  transform: translateY(-2px) scale(1.05);
+  color: #fff;
+  text-decoration: none;
+}
+
+.register-btn {
+  background: linear-gradient(90deg, #0056b3 0%, #94008a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 28px;
+  margin-left: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,86,179,0.08);
+  outline: none;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.register-btn:hover,
+.register-btn:focus {
+  background: linear-gradient(90deg, #94008a 0%, #0056b3 100%);
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 4px 16px rgba(148,0,138,0.12);
+}
+
+.back-btn {
+  background: #fff;
+  color: #0056b3;
+  border: 2px solid #0056b3;
+  border-radius: 5px;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 18px;
+  transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
+  outline: none;
+  display: block;
+  width: 100%;
+}
+
+.back-btn:hover,
+.back-btn:focus {
+  background: #0056b3;
+  color: #fff;
+  border-color: #94008a;
+  transform: translateY(-2px) scale(1.03);
+}

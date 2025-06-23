@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import '../styles/ApproveHostel.css';
+import '../../styles/ApproveHostel.css';
 import AdminHeader from './AdminHeader';
 
 const ApproveHostel = () => {

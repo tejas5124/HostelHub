@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import HostelLayout from "../layouts/HostelLayout";
+import HostelLayout from '../../layouts/HostelLayout';
 import Swal from "sweetalert2";
-import "../styles/AddHostel.css";
+import '../../styles/AddHostel.css';
+import DashboardHeader from '../admin/AdminHeader';
 
 const AddHostel = () => {
   const navigate = useNavigate();
@@ -160,6 +161,7 @@ const AddHostel = () => {
 
   return (
     <HostelLayout>
+      <DashboardHeader role="owner" />
       <div className="form-card">
         <div className="form-header">
           <h2>Add New Hostel</h2>
