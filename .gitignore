@@ -1,15 +1,15 @@
 back/node_modules
 back/package-lock.json
 back/package.json
-back/uploads
+# back/uploads
 
 frontend/node_modules
 frontend/package-lock.json
 frontend/package.json
-frontend/uploads
+# frontend/uploads
 
 
 /node_modules
 /package-lock.json
 /package.json
-/uploads
+# /uploads

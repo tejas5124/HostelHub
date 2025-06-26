@@ -35,7 +35,8 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background-image: url('D:\MERN PROJECTS\Hostel management Project\harry\frontend\src\images\bg.jpeg');
+  background-image: url('../images/bg.jpeg');
+
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

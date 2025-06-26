@@ -156,19 +156,32 @@ const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+require('dotenv').config();
+
 
 // Create the Express app
 const app = express();
 const port = process.env.PORT || 5000;
 const saltRounds = 10; // Number of salt rounds for bcrypt hashing
 
-// Configure CORS
+// Configure CORS for localhost
+
+
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+
+//versal
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'hostel-ch0w92gia-tejas5124s-projects.vercel.app', // replace with actual URL
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -179,17 +192,36 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// MySQL database connection
+// MySQL database connection for localhost
+
+
+// const db = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: 'Balaji',
+//     database: 'hostel',
+//     connectTimeout: 10000, // 10 seconds
+//     waitForConnections: true,
+//     connectionLimit: 10,
+//     queueLimit: 0
+// });
+
+
+//for versal 
+
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Balaji',
-    database: 'hostel',
-    connectTimeout: 10000, // 10 seconds
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+   connectTimeout: 10000, 
+  
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
 });
+
+
 
 
 // Connect to MySQL with better error handling
