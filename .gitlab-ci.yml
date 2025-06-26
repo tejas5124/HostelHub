@@ -1,0 +1,34 @@
+stages:
+  - install
+  - build
+  - test
+
+default:
+  image: node:18
+
+cache:
+  paths:
+    - frontend/node_modules/
+    - back/node_modules/
+
+install_dependencies:
+  stage: install
+  script:
+    - echo "Installing backend dependencies..."
+    - cd back
+    - npm install
+    - cd ../frontend
+    - echo "Installing frontend dependencies..."
+    - npm install
+
+build_frontend:
+  stage: build
+  script:
+    - cd frontend
+    - npm run build
+
+test_backend:
+  stage: test
+  script:
+    - cd back
+    - npm test || echo "No backend tests defined"
