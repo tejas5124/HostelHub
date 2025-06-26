@@ -210,11 +210,11 @@ const transporter = nodemailer.createTransport({
 //for versal 
 
 const db = mysql.createConnection({
-  host: 'sql12.freesqldatabase.com',       // from freesqldatabase.com
-  user: 'sql12787026',                     // your DB username
-  password: 'tLDzJnrqb3',            // your DB password
-  database: 'sql12787026',                 // your DB name
-  port: 3306
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306
 });
 
 
