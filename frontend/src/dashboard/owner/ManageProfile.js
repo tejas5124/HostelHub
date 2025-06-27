@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/api'; // ✅ Use centralized api instance
+import api from '../api'; // ✅ Use centralized api instance
 import '../styles/ManageUsers.css';
 
 const ManageUsers = ({ ownerId }) => {

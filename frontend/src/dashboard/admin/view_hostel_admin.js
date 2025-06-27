@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import api from '../../api/api';
+import api from '../api';
 import '../../styles/view_hostel_admin.css';
 import AdminHeader from './AdminHeader';
 

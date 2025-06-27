@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import HostelLayout from '../../layouts/HostelLayout';
 import '../../styles/ViewHostels.css';
 import DashboardHeader from '../admin/AdminHeader';
-import api from '../../api'; // centralized axios
+import api from '../api'; // centralized axios
 
 const ViewHostels = () => {
   const [hostels, setHostels] = useState([]);

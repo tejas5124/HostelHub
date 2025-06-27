@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DashboardHeader from '../dashboard/admin/AdminHeader';
 import '../styles/Profile.css';
-import api from '../api/api';
-
+import api from '../api'; // ✅ Axios instance
 const roleConfig = {
   admin: {
     idKey: 'admin_id',

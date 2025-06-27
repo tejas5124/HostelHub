@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import '../../styles/student-dashboard.css';
 import '../../styles/MyBookings.css';
 import DashboardHeader from '../admin/AdminHeader';
-import api from '../../api'; // centralized axios
+import api from '../api'; // centralized axios
 
 const MyBookings = () => {
     const [bookings, setBookings] = useState([]);

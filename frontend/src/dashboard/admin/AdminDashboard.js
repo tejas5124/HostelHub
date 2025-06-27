@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/api'; // Updated import for centralized API
+import api from '../api'; // ✅ Axios instance
 import '../../styles/AdminDashboard.css';
 import ViewHostels from './view_hostel_admin';
 import ApproveHostel from './ApproveHostel';

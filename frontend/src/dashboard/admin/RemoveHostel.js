@@ -3,7 +3,7 @@ import HostelLayout from '../../layouts/HostelLayout';
 import '../../styles/ViewHostels.css';
 import Swal from "sweetalert2";
 import DashboardHeader from './AdminHeader';
-import api from '../../api/api';
+import api from '../api';
 
 const RemoveHostel = () => {
   const [hostels, setHostels] = useState([]);
