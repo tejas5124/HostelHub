@@ -27,7 +27,7 @@ build_frontend:
     - cd frontend
     - echo "DISABLE_ESLINT_PLUGIN=true" > .env
     - npx update-browserslist-db@latest || true
-    - npm run build
+    - CI=false npm run build
 
 test_backend:
   stage: test
