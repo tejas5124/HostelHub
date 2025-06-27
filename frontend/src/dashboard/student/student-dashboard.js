@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../../styles/student-dashboard.css';
 import DashboardHeader from '../admin/AdminHeader';
-import Profile from '../../common/Profile';
 import api from '../../api';
 
 const StudentDashboard = () => {
@@ -14,293 +13,110 @@ const StudentDashboard = () => {
     const [sortOption, setSortOption] = useState('');
     const [selectedHostel, setSelectedHostel] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [studentDetails, setStudentDetails] = useState(null);
-    const [stats, setStats] = useState({
-        totalBookings: 0,
-        activeBookings: 0
-    });
+    const [stats, setStats] = useState({ totalBookings: 0, activeBookings: 0 });
     const [showBookingModal, setShowBookingModal] = useState(false);
-    const [bookingDetails, setBookingDetails] = useState({
-        check_in_date: '',
-        check_out_date: '',
-        total_amount: 0
-    });
-    
+    const [bookingDetails, setBookingDetails] = useState({ check_in_date: '', check_out_date: '', total_amount: 0 });
+
     const navigate = useNavigate();
 
     useEffect(() => {
         const checkSession = async () => {
             try {
-                const response = await fetch("/student-session", {
-                    method: "GET",
-                    credentials: "include",
-                });
+                const response = await fetch("/student-session", { method: "GET", credentials: "include" });
                 if (response.ok) {
                     setIsLoggedIn(true);
                     fetchStudentStats();
-                    fetchStudentDetails();
+                    fetchHostels();
                 } else {
                     setIsLoggedIn(false);
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Session Expired',
-                        text: 'Please log in again to continue.',
-                    }).then(() => {
-                        navigate('/student-login');
-                    });
+                    Swal.fire({ icon: 'warning', title: 'Session Expired', text: 'Please log in again to continue.' })
+                        .then(() => navigate('/student-login'));
                 }
             } catch (error) {
-                console.error("Error checking session:", error);
                 setIsLoggedIn(false);
             }
         };
-
         checkSession();
     }, [navigate]);
-
-    const fetchStudentDetails = async () => {
-        const studentId = localStorage.getItem('student_id');
-        if (!studentId) return;
-
-        try {
-            const response = await api.get(`/student-details/${studentId}`);
-            if (response.ok) {
-                const data = await response.json();
-                setStudentDetails(data);
-            } else {
-                console.error('Failed to fetch student details');
-            }
-        } catch (error) {
-            console.error('Error fetching student details:', error);
-        }
-    };
 
     const fetchStudentStats = async () => {
         const studentId = localStorage.getItem('student_id');
         if (!studentId) return;
-
         try {
             const response = await api.get(`/student-stats/${studentId}`);
-            if (response.ok) {
-                const data = await response.json();
-                setStats({
-                    totalBookings: data.totalBookings || 0,
-                    activeBookings: data.activeBookings || 0
-                });
-            }
-        } catch (error) {
-            console.error('Error fetching student stats:', error);
-        }
+            setStats({ totalBookings: response.data.totalBookings || 0, activeBookings: response.data.activeBookings || 0 });
+        } catch (error) {}
     };
 
-    useEffect(() => {
-        const fetchHostels = async () => {
-            try {
-                const response = await api.get('/stu_hostels');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                const processedData = data.map(hostel => ({
-                    ...hostel,
-                    facilities: Array.isArray(hostel.facilities)
-                        ? hostel.facilities
-                        : typeof hostel.facilities === 'string'
-                            ? JSON.parse(hostel.facilities || '[]')
-                            : []
-                }));
-                setHostels(processedData);
-                setOriginalHostels(processedData);
-            } catch (error) {
-                console.error('Error fetching hostels:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to fetch hostels. Please try again later.',
-                });
-            }
-        };
-
-        if (isLoggedIn) {
-            fetchHostels();
+    const fetchHostels = async () => {
+        try {
+            const response = await api.get('/stu_hostels');
+            const processed = response.data.map(h => ({
+                ...h,
+                facilities: Array.isArray(h.facilities) ? h.facilities : typeof h.facilities === 'string' ? JSON.parse(h.facilities || '[]') : []
+            }));
+            setHostels(processed);
+            setOriginalHostels(processed);
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to fetch hostels.' });
         }
-    }, [isLoggedIn]);
+    };
 
     useEffect(() => {
         applyFilters();
     }, [searchTerm, selectedFacilities, sortOption]);
 
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-    };
-
-    const handleFacilityChange = (facility) => {
-        setSelectedFacilities(prev =>
-            prev.includes(facility)
-                ? prev.filter(f => f !== facility)
-                : [...prev, facility]
-        );
-    };
-
-    const handleSortChange = (event) => {
-        setSortOption(event.target.value);
-    };
-
     const applyFilters = () => {
-        let filteredHostels = originalHostels;
-
-        if (searchTerm) {
-            filteredHostels = filteredHostels.filter(hostel =>
-                hostel.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-
-        if (selectedFacilities.length > 0) {
-            filteredHostels = filteredHostels.filter(hostel => {
-                const facilitiesArray = Array.isArray(hostel.facilities)
-                    ? hostel.facilities
-                    : typeof hostel.facilities === 'string'
-                        ? JSON.parse(hostel.facilities || '[]')
-                        : [];
-                return selectedFacilities.every(facility =>
-                    facilitiesArray.includes(facility)
-                );
-            });
-        }
-
-        if (sortOption === 'price_asc') {
-            filteredHostels = filteredHostels.sort((a, b) => a.rent - b.rent);
-        } else if (sortOption === 'price_desc') {
-            filteredHostels = filteredHostels.sort((a, b) => b.rent - a.rent);
-        }
-
-        setHostels(filteredHostels);
-    };
-
-    const handleBookHostel = (hostelId) => {
-        const hostel = hostels.find(h => h.hostel_id === hostelId);
-        setSelectedHostel(hostel);
-    };
-
-    const handleBack = () => {
-        setSelectedHostel(null);
-    };
-
-    const handleLogout = async () => {
-        try {
-            await fetch("/student-logout", {
-                method: "POST",
-                credentials: "include",
-            });
-            localStorage.removeItem('student_id');
-            navigate('/student-login');
-        } catch (error) {
-            console.error("Error logging out:", error);
-        }
-    };
-
-    const calculateTotalAmount = (checkIn) => {
-        if (!checkIn || !selectedHostel) return 0;
-        // Since rate is monthly, we'll just return the monthly rent
-        return selectedHostel.rent;
+        let filtered = [...originalHostels];
+        if (searchTerm) filtered = filtered.filter(h => h.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        if (selectedFacilities.length)
+            filtered = filtered.filter(h => selectedFacilities.every(fac => h.facilities.includes(fac)));
+        if (sortOption === 'price_asc') filtered.sort((a, b) => a.rent - b.rent);
+        else if (sortOption === 'price_desc') filtered.sort((a, b) => b.rent - a.rent);
+        setHostels(filtered);
     };
 
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
         const studentId = localStorage.getItem('student_id');
-        
-        if (!studentId) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Please log in to book a hostel',
-            });
-            return;
-        }
-
         try {
-            const response = await fetch('https://hostelhub-0sy6.onrender.com/add-booking', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    hostel_id: selectedHostel.hostel_id,
-                    student_id: studentId,
-                    check_in_date: bookingDetails.check_in_date,
-                    check_out_date: bookingDetails.check_out_date || null, // Make check-out date optional
-                    total_amount: bookingDetails.total_amount,
-                    payment_status: 'pending'
-                }),
+            const response = await api.post('/add-booking', {
+                hostel_id: selectedHostel.hostel_id,
+                student_id: studentId,
+                check_in_date: bookingDetails.check_in_date,
+                check_out_date: bookingDetails.check_out_date || null,
+                total_amount: bookingDetails.total_amount,
+                payment_status: 'pending'
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Booking request submitted successfully. The hostel owner will review your request.',
-                });
-                setShowBookingModal(false);
-                setSelectedHostel(null);
-            } else {
-                throw new Error(data.message || 'Failed to submit booking request');
-            }
+            Swal.fire({ icon: 'success', title: 'Success!', text: 'Booking request submitted.' });
+            setShowBookingModal(false);
+            setSelectedHostel(null);
         } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to submit booking request',
-            });
+            Swal.fire({ icon: 'error', title: 'Error', text: error.response?.data?.message || 'Booking failed.' });
         }
     };
 
-    if (!isLoggedIn) {
-        return (
-            <div className="login-message">
-                <div className="loading-spinner"></div>
-                <p>Please log in to access the dashboard.</p>
-            </div>
-        );
-    }
+    const calculateTotalAmount = (checkIn) => selectedHostel?.rent || 0;
+
+    if (!isLoggedIn) return <div className="login-message"><div className="loading-spinner"></div><p>Please log in to access the dashboard.</p></div>;
 
     return (
         <div className="dashboard">
             <div className="dashboard-header">
                 <DashboardHeader role="student" />
-                <div className="logo" onClick={() => navigate('/student-dashboard')} style={{ cursor: 'pointer' }}>
-                    <h1>HostelHub</h1>
-                </div>
+                <div className="logo" onClick={() => navigate('/student-dashboard')}><h1>HostelHub</h1></div>
                 <div className="nav-menu">
-                    <button className="nav-button" onClick={() => setSelectedHostel(null)}>
-                        <span className="button-icon">🏠</span>
-                        Browse Hostels
-                    </button>
-                    <button className="nav-button" onClick={() => navigate('/my-bookings')}>
-                        <span className="button-icon">📚</span>
-                        My Bookings
-                    </button>
-                    <button className="nav-button" onClick={() => navigate('/profile')}>
-                        <span className="button-icon">👤</span>
-                        Profile
-                    </button>
+                    <button className="nav-button" onClick={() => setSelectedHostel(null)}>🏠 Browse Hostels</button>
+                    <button className="nav-button" onClick={() => navigate('/my-bookings')}>📚 My Bookings</button>
+                    <button className="nav-button" onClick={() => navigate('/profile')}>👤 Profile</button>
                 </div>
             </div>
             <div className="main-content">
-                {/* Statistics Cards */}
                 <div className="stats-container">
-                    <div className="stat-card">
-                        <h3>Total Bookings</h3>
-                        <p>{stats.totalBookings}</p>
-                    </div>
-                    <div className="stat-card">
-                        <h3>Active Bookings</h3>
-                        <p>{stats.activeBookings}</p>
-                    </div>
+                    <div className="stat-card"><h3>Total Bookings</h3><p>{stats.totalBookings}</p></div>
+                    <div className="stat-card"><h3>Active Bookings</h3><p>{stats.activeBookings}</p></div>
                 </div>
-
-                {!selectedHostel ? (
+            {!selectedHostel ? (
                     <>
                         <div className="search-bar">
                             <input
@@ -386,7 +202,7 @@ const StudentDashboard = () => {
                                             <div className="hostel-image-container">
                                                 <img
                                                     src={hostel.image_path ? 
-                                                       `https://hostelhub-0sy6.onrender.com/uploads/${hostel.image_path.replace(/^\/+/, '')}`:
+                                                        `http://localhost:5000/uploads/${hostel.image_path.replace(/^\/+/, '')}` : 
                                                         "/placeholder.png"}
                                                     alt={hostel.name}
                                                     className="hostel-image"
@@ -451,7 +267,7 @@ const StudentDashboard = () => {
                             <div className="hostel-detail-image-container enhanced-image-container">
                                 <img
                                     src={selectedHostel.image_path ? 
-                                        `https://hostelhub-0sy6.onrender.com/uploads/${selectedHostel.image_path.replace(/^\/+/, '')}` : 
+                                        `http://localhost:5000/uploads/${selectedHostel.image_path.replace(/^\/+/,'')}` : 
                                         "/placeholder.png"}
                                     alt={selectedHostel.name}
                                     className="hostel-detail-image enhanced-detail-image"
