@@ -80,27 +80,25 @@ const StudentDashboard = () => {
     setSearchTerm(e.target.value);
 };
 
-const handleFacilityChange = (e) => {
-    const value = e.target.value;
-    if (selectedFacilities.includes(value)) {
-        setSelectedFacilities(selectedFacilities.filter(fac => fac !== value));
-    } else {
-        setSelectedFacilities([...selectedFacilities, value]);
-    }
+const handleFacilityChange = (facility) => {
+    setSelectedFacilities((prev) =>
+        prev.includes(facility)
+            ? prev.filter((f) => f !== facility)
+            : [...prev, facility]
+    );
 };
 
 const handleSortChange = (e) => {
     setSortOption(e.target.value);
 };
 
-const handleBookHostel = (hostel) => {
+const handleBookHostel = (hostelId) => {
+    const hostel = hostels.find(h => h.hostel_id === hostelId);
     setSelectedHostel(hostel);
-    setShowBookingModal(true);
 };
 
 const handleBack = () => {
     setSelectedHostel(null);
-    setShowBookingModal(false);
 };
 
 
@@ -230,7 +228,7 @@ const handleBack = () => {
                                             <div className="hostel-image-container">
                                                 <img
                                                     src={hostel.image_path ? 
-                                                        `http://localhost:5000/uploads/${hostel.image_path.replace(/^\/+/, '')}` : 
+                                                        `https://hostelhub-0sy6.onrender.com/uploads/${hostel.image_path.replace(/^\/+/, '')}` : 
                                                         "/placeholder.png"}
                                                     alt={hostel.name}
                                                     className="hostel-image"
@@ -295,7 +293,7 @@ const handleBack = () => {
                             <div className="hostel-detail-image-container enhanced-image-container">
                                 <img
                                     src={selectedHostel.image_path ? 
-                                        `http://localhost:5000/uploads/${selectedHostel.image_path.replace(/^\/+/,'')}` : 
+                                        `https://hostelhub-0sy6.onrender.com/uploads/${selectedHostel.image_path.replace(/^\/+/,'')}` : 
                                         "/placeholder.png"}
                                     alt={selectedHostel.name}
                                     className="hostel-detail-image enhanced-detail-image"
@@ -450,7 +448,6 @@ const handleBack = () => {
 };
 
 export default StudentDashboard;
-
 
 
 
