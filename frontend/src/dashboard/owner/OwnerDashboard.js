@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import DashboardHeader from '../admin/AdminHeader';
 import "../../styles/OwnerDashboard.css";
-import api from '../../api'; // using your Axios instance
+import api from '../../api'; // Axios instance with baseURL
 
 const OwnerDashboard = () => {
   const [formType, setFormType] = useState(null);
@@ -12,12 +12,14 @@ const OwnerDashboard = () => {
   const [activeTab, setActiveTab] = useState('bookings');
   const navigate = useNavigate();
 
-  // Check session on mount
+  // ✅ Session check
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await api.get("/owner-session");
-        setIsLoggedIn(true);
+        const response = await api.get("/owner-session", { withCredentials: true });
+        if (response.status === 200) {
+          setIsLoggedIn(true);
+        }
       } catch (error) {
         setIsLoggedIn(false);
         Swal.fire({
@@ -31,7 +33,7 @@ const OwnerDashboard = () => {
     checkSession();
   }, [navigate]);
 
-  // Fetch bookings on mount
+  // ✅ Fetch bookings after mount
   useEffect(() => {
     fetchBookingRequests();
   }, []);
@@ -112,11 +114,31 @@ const OwnerDashboard = () => {
         <h2>Welcome to Your Dashboard</h2>
         <p className="guide-subtitle">Here's what you can do:</p>
         <div className="guide-containers">
-          <div className="guide-container"><strong>Add Hostel</strong><p>Add new hostels with details like location, facilities, and images.</p><span className="guide-icon">🏢</span></div>
-          <div className="guide-container"><strong>Remove Hostel</strong><p>Delete an existing hostel from your listings.</p><span className="guide-icon">🗑️</span></div>
-          <div className="guide-container"><strong>View Hostels</strong><p>See all the hostels you have added.</p><span className="guide-icon">👁️</span></div>
-          <div className="guide-container"><strong>Update Hostel</strong><p>Modify hostel details like availability and pricing.</p><span className="guide-icon">✏️</span></div>
-          <div className="guide-container"><strong>Manage Students</strong><p>Approve or reject student booking requests.</p><span className="guide-icon">👥</span></div>
+          <div className="guide-container">
+            <strong>Add Hostel</strong>
+            <p>Add new hostels with details like location, facilities, and images.</p>
+            <span className="guide-icon">🏢</span>
+          </div>
+          <div className="guide-container">
+            <strong>Remove Hostel</strong>
+            <p>Delete an existing hostel from your listings.</p>
+            <span className="guide-icon">🗑️</span>
+          </div>
+          <div className="guide-container">
+            <strong>View Hostels</strong>
+            <p>See all the hostels you have added.</p>
+            <span className="guide-icon">👁️</span>
+          </div>
+          <div className="guide-container">
+            <strong>Update Hostel</strong>
+            <p>Modify hostel details like availability and pricing.</p>
+            <span className="guide-icon">✏️</span>
+          </div>
+          <div className="guide-container">
+            <strong>Manage Students</strong>
+            <p>Approve or reject student booking requests.</p>
+            <span className="guide-icon">👥</span>
+          </div>
         </div>
       </section>
     </div>
@@ -124,6 +146,7 @@ const OwnerDashboard = () => {
 };
 
 export default OwnerDashboard;
+
 
 
 
