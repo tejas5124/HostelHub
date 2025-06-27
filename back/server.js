@@ -179,7 +179,8 @@ app.use(cors({
  origin: [
     'https://hostel-hub-git-balaji-tejas5124s-projects.vercel.app',
     'https://hostel-hub-tejas5124s-projects.vercel.app',
-    'https://hostel-hub-three.vercel.app'
+    'https://hostel-hub-three.vercel.app',
+    'https://hostelhub.balajimore.info'
   ],
  // replace with actual URL
   credentials: true,
