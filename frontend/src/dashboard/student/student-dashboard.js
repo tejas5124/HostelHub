@@ -76,6 +76,34 @@ const StudentDashboard = () => {
         setHostels(filtered);
     };
 
+    const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+};
+
+const handleFacilityChange = (e) => {
+    const value = e.target.value;
+    if (selectedFacilities.includes(value)) {
+        setSelectedFacilities(selectedFacilities.filter(fac => fac !== value));
+    } else {
+        setSelectedFacilities([...selectedFacilities, value]);
+    }
+};
+
+const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+};
+
+const handleBookHostel = (hostel) => {
+    setSelectedHostel(hostel);
+    setShowBookingModal(true);
+};
+
+const handleBack = () => {
+    setSelectedHostel(null);
+    setShowBookingModal(false);
+};
+
+
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
         const studentId = localStorage.getItem('student_id');
