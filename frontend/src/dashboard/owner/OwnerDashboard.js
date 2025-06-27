@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import DashboardHeader from '../admin/AdminHeader';
 import "../../styles/OwnerDashboard.css";
-import api from '../api'; // using your Axios instance
+import api from '../../api'; // using your Axios instance
 
 const OwnerDashboard = () => {
   const [formType, setFormType] = useState(null);

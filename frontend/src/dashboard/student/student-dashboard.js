@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../../styles/student-dashboard.css';
 import DashboardHeader from '../admin/AdminHeader';
-import api from '../api';
+import api from '../../api';
 
 const StudentDashboard = () => {
     const [hostels, setHostels] = useState([]);

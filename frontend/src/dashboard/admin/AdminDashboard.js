@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api'; // ✅ Axios instance
+import api from '../../api'; // ✅ Axios instance
 import '../../styles/AdminDashboard.css';
 import ViewHostels from './view_hostel_admin';
 import ApproveHostel from './ApproveHostel';

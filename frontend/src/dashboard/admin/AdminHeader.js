@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import '../../styles/AdminHeader.css';
-import api from '../api'; // ✅ Imported centralized Axios instance
+import api from '../../api'; // ✅ Imported centralized Axios instance
 
 const roleConfig = {
   admin: {

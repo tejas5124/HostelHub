@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import '../../styles/ApproveHostel.css';
 import AdminHeader from './AdminHeader';
-import api from '../api';
+import api from '../../api';
 
 const ApproveHostel = () => {
   const [hostels, setHostels] = useState([]);

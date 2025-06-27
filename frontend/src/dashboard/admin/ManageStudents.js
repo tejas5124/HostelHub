@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardHeader from './AdminHeader';
 import '../../styles/ManageStudents.css';
 import Swal from 'sweetalert2';
-import api from '../api';
+import api from '../../api';
 
 const ManageStudents = () => {
   const [bookingRequests, setBookingRequests] = useState([]);

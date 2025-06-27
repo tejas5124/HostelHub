@@ -4,7 +4,7 @@ import HostelLayout from '../../layouts/HostelLayout';
 import '../../styles/ViewHostels.css';
 import DashboardHeader from '../admin/AdminHeader';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
+import api from '../../api';
 
 const UpdateHostel = () => {
   const navigate = useNavigate();

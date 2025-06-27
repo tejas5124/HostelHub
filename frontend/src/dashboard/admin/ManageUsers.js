@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import api from '../api'; // Use centralized API
+import api from '../../api'; // Use centralized API
 import '../styles/ManageUsers.css';
 
 const ManageUsers = () => {

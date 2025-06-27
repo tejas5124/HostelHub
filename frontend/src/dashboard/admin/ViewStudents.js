@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../api'; // ✅ Use your configured Axios instance
+import api from '../../api'; // ✅ Use your configured Axios instance
 import '../../styles/StudentList.css';
 
 const StudentList = () => {

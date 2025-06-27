@@ -4,7 +4,7 @@ import HostelLayout from '../../layouts/HostelLayout';
 import Swal from "sweetalert2";
 import '../../styles/AddHostel.css';
 import DashboardHeader from '../admin/AdminHeader';
-import api from '../api';
+import api from '../../api';
 
 const AddHostel = () => {
   const navigate = useNavigate();
