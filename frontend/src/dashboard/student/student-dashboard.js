@@ -76,6 +76,32 @@ const StudentDashboard = () => {
         setHostels(filtered);
     };
 
+    const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+};
+
+const handleFacilityChange = (facility) => {
+    setSelectedFacilities((prev) =>
+        prev.includes(facility)
+            ? prev.filter((f) => f !== facility)
+            : [...prev, facility]
+    );
+};
+
+const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+};
+
+const handleBookHostel = (hostelId) => {
+    const hostel = hostels.find(h => h.hostel_id === hostelId);
+    setSelectedHostel(hostel);
+};
+
+const handleBack = () => {
+    setSelectedHostel(null);
+};
+
+
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
         const studentId = localStorage.getItem('student_id');
