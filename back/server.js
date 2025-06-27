@@ -176,7 +176,11 @@ const saltRounds = 10; // Number of salt rounds for bcrypt hashing
 
 //versal
 app.use(cors({
-  origin: 'hostel-ch0w92gia-tejas5124s-projects.vercel.app', // replace with actual URL
+  origin: [
+  'https://hostelhub-eight.vercel.app',
+  'https://hostelhub-60wojgomt-tejas5124s-projects.vercel.app',
+  'http://localhost:3000' // optional for local testing
+], // replace with actual URL
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
