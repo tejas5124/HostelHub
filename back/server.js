@@ -1645,7 +1645,7 @@ app.post('/forgot-password-student', async (req, res) => {
         }
 
         // Send reset email
-        const resetUrl = `http://localhost:3000/reset-password-student/${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password-student/${resetToken}`;
         const mailOptions = {
           from: 'balajimore9193@gmail.com',
           to: email,
@@ -1724,7 +1724,7 @@ app.post('/forgot-password-owner', async (req, res) => {
         }
 
         // Send reset email
-        const resetUrl = `http://localhost:3000/reset-password-owner/${resetToken}`;
+         const resetUrl = `${process.env.FRONTEND_URL}/reset-password-owner/${resetToken}`;
         const mailOptions = {
           from: 'balajimore9193@gmail.com',
           to: email,
