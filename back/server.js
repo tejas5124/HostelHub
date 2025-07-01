@@ -266,16 +266,19 @@ app.use(bodyParser.json());
 
 
 
+app.set('trust proxy', 1);  // ← tell Express it’s behind HTTPS proxy
+
 app.use(session({
-  secret: 'your_secret_key', // Use a strong secret in production
-  resave: false,
-  saveUninitialized: false,
+  secret: 'your_secret_key',     // use a strong, env‑based secret
+  resave: false,                 // recommended
+  saveUninitialized: false,      // don’t save empty sessions
   cookie: {
-    httpOnly: true,
-    secure: true,           // ✅ Required for HTTPS (Render uses HTTPS)
-    sameSite: 'None'        // ✅ Required for cross-origin session cookies
+    httpOnly: true,              // JS on the client cannot access the cookie
+    secure: true,                // ✅ cookie only sent over HTTPS
+    sameSite: 'None'             // ✅ allows cross‑site cookie
   }
 }));
+
 
 // Function to hash password
 const hashPassword = (password) => {
