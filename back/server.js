@@ -318,7 +318,7 @@ app.post('/login', (req, res) => {
       }
 
       if (isMatch) {
-        req.session.user = { id: user.student_id, email: user.email }; // Set session if needed
+        req.session.student = { id: user.student_id, email: user.email }; // Set session if needed
         res.status(200).json({ 
           message: 'Login successful',
           student_id: user.student_id // Include student_id in the response
@@ -1265,6 +1265,17 @@ app.get('/owner-stats/:ownerId', async (req, res) => {
     res.status(500).json({ message: 'Error fetching owner statistics' });
   }
 });
+
+
+
+app.get('/student-session', (req, res) => {
+  if (req.session.student) {
+    res.status(200).json({ message: 'Student session active', student: req.session.student });
+  } else {
+    res.status(401).json({ message: 'Session expired' });
+  }
+});
+
 
 // Add new booking request
 app.post('/add-booking', async (req, res) => {
