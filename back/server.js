@@ -331,7 +331,7 @@ app.post('/login', (req, res) => {
 });
 
 // Route to handle student logout
-app.post('/logout', (req, res) => {
+app.post('/student-logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
       console.error('Error destroying session:', err);
