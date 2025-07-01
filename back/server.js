@@ -365,8 +365,63 @@ app.post('/register', async (req, res) => {
   }
 });
 
+
+//owner session
+app.get('/owner-session', (req, res) => {
+  console.log('Checking session:', req.session);
+
+  if (req.session.owner) {
+    res.status(200).json({ message: 'Session active', owner: req.session.owner });
+  } else {
+    res.status(401).json({ message: 'Session expired' });
+  }
+});
+
+
+
 // Route to handle owner login
-// Route to handle owner login
+
+// app.post('/owner-login', (req, res) => {
+//   const { email, password } = req.body;
+
+//   if (!email || !password) {
+//     return res.status(400).json({ message: 'Email and password are required' });
+//   }
+
+//   const query = 'SELECT * FROM hostelowner WHERE email = ?';
+//   db.query(query, [email], (err, results) => {
+//     if (err) {
+//       console.error('Error querying database:', err);
+//       return res.status(500).json({ message: 'Internal Server Error' });
+//     }
+
+//     if (results.length === 0) {
+//       return res.status(401).json({ message: 'Invalid email or password' });
+//     }
+
+//     const owner = results[0];
+
+//     bcrypt.compare(password, owner.password, (err, isMatch) => {
+//       if (err) {
+//         console.error('Error comparing passwords:', err);
+//         return res.status(500).json({ message: 'Internal Server Error' });
+//       }
+
+//       if (isMatch) {
+//         req.session.user = { id: owner.owner_id, email: owner.email };
+//         res.status(200).json({ 
+//           message: 'Login successful', 
+//           owner_id: owner.owner_id // Include owner_id in the response
+//         });
+//       } else {
+//         res.status(401).json({ message: 'Invalid email or password' });
+//       }
+//     });
+//   });
+// });
+
+//New Login  route
+
 app.post('/owner-login', (req, res) => {
   const { email, password } = req.body;
 
@@ -394,10 +449,11 @@ app.post('/owner-login', (req, res) => {
       }
 
       if (isMatch) {
-        req.session.user = { id: owner.owner_id, email: owner.email };
+        req.session.owner = { id: owner.owner_id, email: owner.email }; // ✅ FIXED
+        console.log('Login successful, session set:', req.session.owner);
         res.status(200).json({ 
           message: 'Login successful', 
-          owner_id: owner.owner_id // Include owner_id in the response
+          owner_id: owner.owner_id 
         });
       } else {
         res.status(401).json({ message: 'Invalid email or password' });
@@ -405,6 +461,7 @@ app.post('/owner-login', (req, res) => {
     });
   });
 });
+
 
 // Route to handle owner logout
 app.post('/owner-logout', (req, res) => {
