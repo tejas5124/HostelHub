@@ -1292,27 +1292,50 @@ app.post('/add-booking', async (req, res) => {
                 }
 
                 // Insert the booking request
-                const bookingQuery = `
-                    INSERT INTO bookings (
-                        hostel_id, 
-                        student_id, 
-                        check_in_date, 
-                        check_out_date, 
-                        total_amount, 
-                        payment_status,
-                        booking_status,
-                        created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
-                `;
 
-                const bookingValues = [
-                    hostel_id,
-                    student_id,
-                    check_in_date,
-                    check_out_date || null,
-                    total_amount,
-                    payment_status || 'pending'
-                ];
+                // const bookingQuery = `
+                //     INSERT INTO bookings (
+                //         hostel_id, 
+                //         student_id, 
+                //         check_in_date, 
+                //         check_out_date, 
+                //         total_amount, 
+                //         payment_status,
+                //         booking_status,
+                //         created_at
+                //     ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+                // `;
+
+                // const bookingValues = [
+                //     hostel_id,
+                //     student_id,
+                //     check_in_date,
+                //     check_out_date || null,
+                //     total_amount,
+                //     payment_status || 'pending'
+                // ];
+
+                const bookingQuery = `
+  INSERT INTO bookings (
+    hostel_id, 
+    student_id, 
+    check_in_date, 
+    check_out_date, 
+    total_amount, 
+    payment_status,
+    booking_status
+  ) VALUES (?, ?, ?, ?, ?, ?, 'pending')
+`;
+
+const bookingValues = [
+  hostel_id,
+  student_id,
+  check_in_date,
+  check_out_date || null,
+  total_amount,
+  payment_status || 'pending'
+];
+
 
                 console.log('Executing booking query with values:', bookingValues);
 
