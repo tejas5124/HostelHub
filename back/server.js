@@ -256,11 +256,25 @@ db.on('error', (err) => {
 app.use(bodyParser.json());
 
 // Session middleware
+
+// app.use(session({
+//   secret: 'your_secret_key', // Replace with your secret key
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: false } // Set to true if using HTTPS
+// }));
+
+
+
 app.use(session({
-  secret: 'your_secret_key', // Replace with your secret key
+  secret: 'your_secret_key', // Use a strong secret in production
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: true,           // ✅ Required for HTTPS (Render uses HTTPS)
+    sameSite: 'None'        // ✅ Required for cross-origin session cookies
+  }
 }));
 
 // Function to hash password
