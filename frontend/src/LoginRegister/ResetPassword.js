@@ -41,7 +41,8 @@ function ResetPassword() {
         ? '/reset-password-student'
         : '/reset-password-owner';
 
-      const response = await api.post(endpoint, { token, newPassword });
+      // const response = await api.post(endpoint, { token, newPassword });
+      const response = await api.post(endpoint, {token,newPassword,confirmPassword});
 
       Swal.fire({
         icon: 'success',

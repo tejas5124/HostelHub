@@ -13,6 +13,7 @@ function ForgotPassword({ userType }) {
     e.preventDefault();
     setLoading(true);
 
+    
     const endpoint = userType === 'student'
       ? '/forgot-password-student'
       : '/forgot-password-owner';
