@@ -1278,96 +1278,153 @@ app.get('/student-session', (req, res) => {
 
 
 // Add new booking request
-app.post('/add-booking', async (req, res) => {
-    const { hostel_id, student_id, check_in_date, check_out_date, total_amount, payment_status } = req.body;
+
+// app.post('/add-booking', async (req, res) => {
+//     const { hostel_id, student_id, check_in_date, check_out_date, total_amount, payment_status } = req.body;
     
-    try {
-        console.log('Received booking request:', req.body); // Debug log
+//     try {
+//         console.log('Received booking request:', req.body); // Debug log
 
-        // First check if the hostel has available rooms
-        db.query(
-            'SELECT available_rooms FROM hosteldetails WHERE hostel_id = ?',
-            [hostel_id],
-            (err, hostelResults) => {
-                if (err) {
-                    console.error('Error checking hostel availability:', err);
-                    return res.status(500).json({ message: 'Error checking hostel availability' });
-                }
+//         // First check if the hostel has available rooms
+//         db.query(
+//             'SELECT available_rooms FROM hosteldetails WHERE hostel_id = ?',
+//             [hostel_id],
+//             (err, hostelResults) => {
+//                 if (err) {
+//                     console.error('Error checking hostel availability:', err);
+//                     return res.status(500).json({ message: 'Error checking hostel availability' });
+//                 }
 
-                if (hostelResults.length === 0) {
-                    return res.status(404).json({ message: 'Hostel not found' });
-                }
+//                 if (hostelResults.length === 0) {
+//                     return res.status(404).json({ message: 'Hostel not found' });
+//                 }
 
-                if (hostelResults[0].available_rooms <= 0) {
-                    return res.status(400).json({ message: 'No rooms available in this hostel' });
-                }
+//                 if (hostelResults[0].available_rooms <= 0) {
+//                     return res.status(400).json({ message: 'No rooms available in this hostel' });
+//                 }
 
-                // Insert the booking request
+//                 // Insert the booking request
 
-                // const bookingQuery = `
-                //     INSERT INTO bookings (
-                //         hostel_id, 
-                //         student_id, 
-                //         check_in_date, 
-                //         check_out_date, 
-                //         total_amount, 
-                //         payment_status,
-                //         booking_status,
-                //         created_at
-                //     ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
-                // `;
+//                 const bookingQuery = `
+//                     INSERT INTO bookings (
+//                         hostel_id, 
+//                         student_id, 
+//                         check_in_date, 
+//                         check_out_date, 
+//                         total_amount, 
+//                         payment_status,
+//                         booking_status,
+//                         created_at
+//                     ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+//                 `;
 
-                // const bookingValues = [
-                //     hostel_id,
-                //     student_id,
-                //     check_in_date,
-                //     check_out_date || null,
-                //     total_amount,
-                //     payment_status || 'pending'
-                // ];
+//                 const bookingValues = [
+//                     hostel_id,
+//                     student_id,
+//                     check_in_date,
+//                     check_out_date || null,
+//                     total_amount,
+//                     payment_status || 'pending'
+//                 ];
 
-                const bookingQuery = `
-  INSERT INTO bookings (
-    hostel_id, 
-    student_id, 
-    check_in_date, 
-    check_out_date, 
-    total_amount, 
-    payment_status,
-    booking_status
-  ) VALUES (?, ?, ?, ?, ?, ?, 'pending')
-`;
+//                 console.log('Executing booking query with values:', bookingValues);
 
-const bookingValues = [
-  hostel_id,
-  student_id,
-  check_in_date,
-  check_out_date || null,
-  total_amount,
-  payment_status || 'pending'
-];
+//                 db.query(bookingQuery, bookingValues, (err, result) => {
+//                     if (err) {
+//                         console.error('Error inserting booking:', err);
+//                         return res.status(500).json({ message: 'Error adding booking request' });
+//                     }
+
+//                     res.status(201).json({
+//                         message: 'Booking request submitted successfully',
+//                         booking_id: result.insertId
+//                     });
+//                 });
+//             }
+//         );
+//     } catch (error) {
+//         console.error('Unexpected error in add-booking:', error);
+//         res.status(500).json({ message: 'Unexpected error adding booking request' });
+//     }
+// });
 
 
-                console.log('Executing booking query with values:', bookingValues);
+// New Add new booking request
+app.post('/add-booking', async (req, res) => {
+    const {
+        hostel_id,
+        student_id,
+        check_in_date,
+        check_out_date,
+        total_amount,
+        payment_status
+    } = req.body;
 
-                db.query(bookingQuery, bookingValues, (err, result) => {
-                    if (err) {
-                        console.error('Error inserting booking:', err);
-                        return res.status(500).json({ message: 'Error adding booking request' });
-                    }
+    console.log('📥 Received booking request:', req.body); // Debug log
 
-                    res.status(201).json({
-                        message: 'Booking request submitted successfully',
-                        booking_id: result.insertId
-                    });
-                });
-            }
-        );
-    } catch (error) {
-        console.error('Unexpected error in add-booking:', error);
-        res.status(500).json({ message: 'Unexpected error adding booking request' });
+    // ✅ Basic validation
+    if (!hostel_id || !student_id || !check_in_date || !total_amount) {
+        console.error('❌ Missing required fields');
+        return res.status(400).json({ message: 'Missing required fields' });
     }
+
+    // ✅ Check availability
+    db.query(
+        'SELECT available_rooms FROM hosteldetails WHERE hostel_id = ?',
+        [hostel_id],
+        (err, hostelResults) => {
+            if (err) {
+                console.error('❌ Error checking hostel availability:', err);
+                return res.status(500).json({ message: 'Error checking hostel availability' });
+            }
+
+            if (hostelResults.length === 0) {
+                return res.status(404).json({ message: 'Hostel not found' });
+            }
+
+            if (hostelResults[0].available_rooms <= 0) {
+                return res.status(400).json({ message: 'No rooms available in this hostel' });
+            }
+
+            // ✅ Insert booking
+            const bookingQuery = `
+                INSERT INTO bookings (
+                    hostel_id, 
+                    student_id, 
+                    check_in_date, 
+                    check_out_date, 
+                    total_amount, 
+                    payment_status,
+                    booking_status
+                ) VALUES (?, ?, ?, ?, ?, ?, 'pending')
+            `;
+
+            const bookingValues = [
+                hostel_id,
+                student_id,
+                check_in_date,
+                check_out_date || null,
+                total_amount,
+                payment_status || 'pending'
+            ];
+
+            console.log('📦 Executing booking query with values:', bookingValues);
+
+            db.query(bookingQuery, bookingValues, (err, result) => {
+                if (err) {
+                    console.error('❌ Error inserting booking:', err);
+                    return res.status(500).json({ message: 'Error adding booking request' });
+                }
+
+                res.status(201).json({
+                    message: '✅ Booking request submitted successfully',
+                    booking_id: result.insertId
+                });
+            });
+        }
+    );
 });
+
 
 // Get booking requests for a hostel owner
 app.get('/owner-bookings/:owner_id', (req, res) => {
