@@ -48,7 +48,7 @@ function App() {
         <Route path="/view-hostels" element={<ViewHostels />} />
         <Route path="/update-hostels" element={<UpdateHostels />} />
         <Route path="/hostel-view" element={<HostelView />} />
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        // <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/manage-students" element={<ManageStudents />} />
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/forgot-password-student" element={<ForgotPassword userType="student" />} />
