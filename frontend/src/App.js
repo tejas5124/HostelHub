@@ -23,6 +23,8 @@ import UpdateHostels from "./dashboard/owner/UpdateHostel";
 import ForgotPassword from './LoginRegister/ForgotPassword';
 import ResetPassword from './LoginRegister/ResetPassword';
 import Profile from './common/Profile';
+import ProtectedRoute from './common/ProtectedRoute';
+
 
 function App() {
   return (
@@ -56,6 +58,17 @@ function App() {
         <Route path="/profile" element={<Profile role="admin" />} />
         <Route path="/owner-profile" element={<Profile role="owner" />} />
         <Route path="/student-profile" element={<Profile role="student" />} />
+
+
+  {/* 🔒 Protected Dashboards */}
+  <Route
+    path="/student-dashboard"
+    element={
+      <ProtectedRoute>
+        <StudentDashboard />
+      </ProtectedRoute>
+    }
+  />
       </Routes>
     </Router>
   );
