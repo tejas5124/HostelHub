@@ -130,6 +130,17 @@ router.post('/reset-password', async (req, res) => {
   });
 });
 
+// Admin authentication middleware
+function isAdmin(req, res, next) {
+  if (req.session && req.session.user && req.session.user.id) {
+    return next();
+  }
+  return res.status(401).json({ message: 'Unauthorized' });
+}
+
+// Protect all routes below this line
+router.use(isAdmin);
+
 // Get admin profile
 router.get('/:id', (req, res) => {
   const db = req.app.locals.db;

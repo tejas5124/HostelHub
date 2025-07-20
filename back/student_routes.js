@@ -138,6 +138,17 @@ router.post('/reset-password', async (req, res) => {
   });
 });
 
+// Student authentication middleware
+function isStudent(req, res, next) {
+  if (req.session && req.session.user && req.session.user.id) {
+    return next();
+  }
+  return res.status(401).json({ message: 'Unauthorized' });
+}
+
+// Protect all routes below this line
+router.use(isStudent);
+
 // Student Profile
 router.get('/:id', (req, res) => {
   const db = req.app.locals.db;

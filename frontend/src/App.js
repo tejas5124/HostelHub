@@ -23,7 +23,7 @@ import UpdateHostels from "./dashboard/owner/UpdateHostel";
 import ForgotPassword from './LoginRegister/ForgotPassword';
 import ResetPassword from './LoginRegister/ResetPassword';
 import Profile from './common/Profile';
-import ProtectedRoute from './common/ProtectedRoute';
+import ProtectedRoute, { AdminProtectedRoute, OwnerProtectedRoute } from './common/ProtectedRoute';
 
 
 function App() {
@@ -41,12 +41,32 @@ function App() {
         <Route path="/owner-register" element={<OwnerRegister />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-register" element={<AdminRegister />} />
-        <Route path="/owner-dashboard" element={<OwnerDashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/add-hostel" element={<AddHostel />} />
+        <Route path="/owner-dashboard" element={
+          <OwnerProtectedRoute>
+            <OwnerDashboard />
+          </OwnerProtectedRoute>
+        } />
+        <Route path="/admin-dashboard" element={
+          <AdminProtectedRoute>
+            <AdminDashboard />
+          </AdminProtectedRoute>
+        } />
+        <Route path="/add-hostel" element={
+          <OwnerProtectedRoute>
+            <AddHostel />
+          </OwnerProtectedRoute>
+        } />
         <Route path="/remove-hostel" element={<RemoveHostel />} />
-        <Route path="/view-hostels" element={<ViewHostels />} />
-        <Route path="/update-hostels" element={<UpdateHostels />} />
+        <Route path="/view-hostels" element={
+          <OwnerProtectedRoute>
+            <ViewHostels />
+          </OwnerProtectedRoute>
+        } />
+        <Route path="/update-hostels" element={
+          <OwnerProtectedRoute>
+            <UpdateHostels />
+          </OwnerProtectedRoute>
+        } />
         <Route path="/hostel-view" element={<HostelView />} />
         // <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/manage-students" element={<ManageStudents />} />
@@ -56,7 +76,11 @@ function App() {
         <Route path="/reset-password-student/:token" element={<ResetPassword userType="student" />} />
         <Route path="/reset-password-owner/:token" element={<ResetPassword userType="owner" />} />
         <Route path="/profile" element={<Profile role="admin" />} />
-        <Route path="/owner-profile" element={<Profile role="owner" />} />
+        <Route path="/owner-profile" element={
+          <OwnerProtectedRoute>
+            <Profile role="owner" />
+          </OwnerProtectedRoute>
+        } />
         <Route path="/student-profile" element={<Profile role="student" />} />
 
 
