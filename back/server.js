@@ -266,12 +266,12 @@ app.use(bodyParser.json());
 
 
 
-app.set('trust proxy', 1);  // ← tell Express it’s behind HTTPS proxy
+app.set('trust proxy', 1);  // ← tell Express it's behind HTTPS proxy
 
 app.use(session({
   secret: 'your_secret_key',     // use a strong, env‑based secret
   resave: false,                 // recommended
-  saveUninitialized: false,      // don’t save empty sessions
+  saveUninitialized: false,      // don't save empty sessions
   cookie: {
     httpOnly: true,              // JS on the client cannot access the cookie
     secure: true,                // ✅ cookie only sent over HTTPS
@@ -2081,3 +2081,45 @@ app.put('/admin-update/:admin_id', (req, res) => {
 });
 
 //add code for pull request or comparing previous code 
+
+// Admin authentication middleware
+function isAdmin(req, res, next) {
+  if (req.session && req.session.user && req.session.user.id) {
+    return next();
+  }
+  return res.status(401).json({ message: 'Unauthorized' });
+}
+// Owner authentication middleware
+function isOwner(req, res, next) {
+  if (req.session && req.session.owner && req.session.owner.id) {
+    return next();
+  }
+  return res.status(401).json({ message: 'Unauthorized' });
+}
+// Student authentication middleware
+function isStudent(req, res, next) {
+  if (req.session && req.session.student && req.session.student.id) {
+    return next();
+  }
+  return res.status(401).json({ message: 'Unauthorized' });
+}
+// Mount routes with security middleware
+const publicPaths = ['/register', '/login', '/forgot-password', '/reset-password'];
+app.use('/api/students', (req, res, next) => {
+  if (publicPaths.some(path => req.path.startsWith(path))) {
+    return next();
+  }
+  return isStudent(req, res, next);
+}, require('./student_routes'));
+app.use('/api/owners', (req, res, next) => {
+  if (publicPaths.some(path => req.path.startsWith(path))) {
+    return next();
+  }
+  return isOwner(req, res, next);
+}, require('./owner_routes'));
+app.use('/api/admins', (req, res, next) => {
+  if (publicPaths.some(path => req.path.startsWith(path))) {
+    return next();
+  }
+  return isAdmin(req, res, next);
+}, require('./admin_routes'));
