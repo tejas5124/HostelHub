@@ -39,6 +39,18 @@ const StudentDashboard = () => {
         checkSession();
     }, [navigate]);
 
+    useEffect(() => {
+        const checkSession = async () => {
+            try {
+                await api.get('/students/session', { withCredentials: true });
+            } catch (error) {
+                localStorage.removeItem('student_id');
+                navigate('/student-login', { replace: true });
+            }
+        };
+        checkSession();
+    }, [navigate]);
+
     const fetchStudentStats = async () => {
         const studentId = localStorage.getItem('student_id');
         if (!studentId) return;

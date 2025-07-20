@@ -9,6 +9,17 @@ import AdminHeader from './AdminHeader';
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        await api.get('/admins/session', { withCredentials: true });
+      } catch (error) {
+        localStorage.removeItem('admin_id');
+        navigate('/admin-login', { replace: true });
+      }
+    };
+    checkSession();
+  }, [navigate]);
   const [formType, setFormType] = useState(null);
   const [hostels, setHostels] = useState([]);
   const [approvedCount, setApprovedCount] = useState(0);

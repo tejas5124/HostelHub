@@ -2123,3 +2123,25 @@ app.use('/api/admins', (req, res, next) => {
   }
   return isAdmin(req, res, next);
 }, require('./admin_routes'));
+
+// Secure session check for admin
+app.get('/api/admins/session', (req, res) => {
+  if (req.session && req.session.user && req.session.user.id) {
+    return res.status(200).json({ loggedIn: true, user: req.session.user });
+  }
+  return res.status(401).json({ loggedIn: false });
+});
+// Secure session check for owner
+app.get('/api/owners/session', (req, res) => {
+  if (req.session && req.session.owner && req.session.owner.id) {
+    return res.status(200).json({ loggedIn: true, owner: req.session.owner });
+  }
+  return res.status(401).json({ loggedIn: false });
+});
+// Secure session check for student
+app.get('/api/students/session', (req, res) => {
+  if (req.session && req.session.student && req.session.student.id) {
+    return res.status(200).json({ loggedIn: true, student: req.session.student });
+  }
+  return res.status(401).json({ loggedIn: false });
+});
