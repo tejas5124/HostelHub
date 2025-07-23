@@ -21,7 +21,6 @@ import RemoveHostel from "./dashboard/admin/RemoveHostel";
 import ViewHostels from "./dashboard/owner/ViewHostels";
 import UpdateHostels from "./dashboard/owner/UpdateHostel";
 import ForgotPassword from './LoginRegister/ForgotPassword';
-import ResetPassword from './LoginRegister/ResetPassword';
 import Profile from './common/Profile';
 import ProtectedRoute, { AdminProtectedRoute, OwnerProtectedRoute } from './common/ProtectedRoute';
 import ResetPasswordStudent from './LoginRegister/ResetPasswordStudent';
