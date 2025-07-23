@@ -435,8 +435,8 @@ app.post('/owner-login', (req, res) => {
   const query = 'SELECT * FROM hostelowner WHERE email = ?';
   db.query(query, [email], (err, results) => {
     if (err) {
-      console.error('Error querying database:', err);
-      return res.status(500).json({ message: 'Internal Server Error' });
+      console.error('Error querying database (owner-login):', err);
+      return res.status(500).json({ message: 'Database error', error: err.message });
     }
 
     if (results.length === 0) {
@@ -445,10 +445,15 @@ app.post('/owner-login', (req, res) => {
 
     const owner = results[0];
 
+    if (!owner.password) {
+      console.error('Owner record found but password field is missing or null:', owner);
+      return res.status(500).json({ message: 'Owner record is corrupted: password missing' });
+    }
+
     bcrypt.compare(password, owner.password, (err, isMatch) => {
       if (err) {
-        console.error('Error comparing passwords:', err);
-        return res.status(500).json({ message: 'Internal Server Error' });
+        console.error('Error comparing passwords (owner-login):', err);
+        return res.status(500).json({ message: 'Password comparison error', error: err.message });
       }
 
       if (isMatch) {
