@@ -24,6 +24,8 @@ import ForgotPassword from './LoginRegister/ForgotPassword';
 import ResetPassword from './LoginRegister/ResetPassword';
 import Profile from './common/Profile';
 import ProtectedRoute, { AdminProtectedRoute, OwnerProtectedRoute } from './common/ProtectedRoute';
+import ResetPasswordStudent from './LoginRegister/ResetPasswordStudent';
+import ResetPasswordOwner from './LoginRegister/ResetPasswordOwner';
 
 
 function App() {
@@ -73,8 +75,8 @@ function App() {
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/forgot-password-student" element={<ForgotPassword userType="student" />} />
         <Route path="/forgot-password-owner" element={<ForgotPassword userType="owner" />} />
-        <Route path="/reset-password-student/:token" element={<ResetPassword userType="student" />} />
-        <Route path="/reset-password-owner/:token" element={<ResetPassword userType="owner" />} />
+        <Route path="/reset-password-student/:token" element={<ResetPasswordStudent />} />
+        <Route path="/reset-password-owner/:token" element={<ResetPasswordOwner />} />
         <Route path="/profile" element={<Profile role="admin" />} />
         <Route path="/owner-profile" element={
           <OwnerProtectedRoute>
