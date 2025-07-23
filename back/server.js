@@ -100,6 +100,9 @@
 // });
 
 
+//main code
+
+
 
 
 
@@ -180,7 +183,8 @@ app.use(cors({
     'https://hostel-hub-git-balaji-tejas5124s-projects.vercel.app',
     'https://hostel-hub-tejas5124s-projects.vercel.app',
     'https://hostel-hub-three.vercel.app',
-    'https://hostelhub.balajimore.info'
+    'https://hostelhub.balajimore.info',
+    'http://localhost:3000'
   ],
  // replace with actual URL
   credentials: true,
