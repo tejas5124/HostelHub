@@ -435,35 +435,37 @@ app.post('/owner-login', (req, res) => {
   const query = 'SELECT * FROM hostelowner WHERE email = ?';
   db.query(query, [email], (err, results) => {
     if (err) {
-      console.error('Error querying database (owner-login):', err);
-      return res.status(500).json({ message: 'Database error', error: err.message });
+      console.error('Error querying database:', err);
+      return res.status(500).json({ message: 'Database query error', error: err.message });
     }
 
-    if (results.length === 0) {
+    if (!results || results.length === 0) {
+      console.warn('No owner found for email:', email);
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     const owner = results[0];
 
     if (!owner.password) {
-      console.error('Owner record found but password field is missing or null:', owner);
-      return res.status(500).json({ message: 'Owner record is corrupted: password missing' });
+      console.error('Owner record found but password is missing in DB for email:', email);
+      return res.status(500).json({ message: 'Owner record is corrupted (no password set)' });
     }
 
     bcrypt.compare(password, owner.password, (err, isMatch) => {
       if (err) {
-        console.error('Error comparing passwords (owner-login):', err);
+        console.error('Error comparing passwords:', err);
         return res.status(500).json({ message: 'Password comparison error', error: err.message });
       }
 
       if (isMatch) {
-        req.session.owner = { id: owner.owner_id, email: owner.email }; // ✅ FIXED
+        req.session.owner = { id: owner.owner_id, email: owner.email };
         console.log('Login successful, session set:', req.session.owner);
         res.status(200).json({ 
           message: 'Login successful', 
           owner_id: owner.owner_id 
         });
       } else {
+        console.warn('Password mismatch for owner email:', email);
         res.status(401).json({ message: 'Invalid email or password' });
       }
     });
