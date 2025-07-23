@@ -1955,7 +1955,7 @@ app.post('/forgot-password-owner', async (req, res) => {
 // Route to handle password reset for students
 app.post('/reset-password-student', async (req, res) => {
   const { token, newPassword } = req.body;
-  console.log('Received student reset request:', { token, newPassword: !!newPassword });
+  console.log('[RESET] Received student reset request:', { token, newPassword: !!newPassword });
 
   if (!token || !newPassword) {
     return res.status(400).json({ message: 'Token and new password are required' });
@@ -1966,11 +1966,11 @@ app.post('/reset-password-student', async (req, res) => {
     const query = 'SELECT * FROM student WHERE reset_token = ? AND reset_token_expiry > NOW()';
     db.query(query, [token], async (err, results) => {
       if (err) {
-        console.error('Error querying database:', err);
+        console.error('[RESET] Error querying student database:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
       }
 
-      console.log('DB results for student token:', results);
+      console.log('[RESET] DB results for student token:', results);
 
       if (results.length === 0) {
         return res.status(400).json({ message: 'Invalid or expired reset token' });
@@ -1983,7 +1983,7 @@ app.post('/reset-password-student', async (req, res) => {
       const updateQuery = 'UPDATE student SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
       db.query(updateQuery, [hashedPassword, token], (err) => {
         if (err) {
-          console.error('Error updating password:', err);
+          console.error('[RESET] Error updating student password:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
         }
 
@@ -1991,7 +1991,7 @@ app.post('/reset-password-student', async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Error in password reset:', error);
+    console.error('[RESET] Error in student password reset:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
@@ -1999,7 +1999,7 @@ app.post('/reset-password-student', async (req, res) => {
 // Route to handle password reset for owners
 app.post('/reset-password-owner', async (req, res) => {
   const { token, newPassword } = req.body;
-  console.log('Received owner reset request:', { token, newPassword: !!newPassword });
+  console.log('[RESET] Received owner reset request:', { token, newPassword: !!newPassword });
 
   if (!token || !newPassword) {
     return res.status(400).json({ message: 'Token and new password are required' });
@@ -2010,11 +2010,11 @@ app.post('/reset-password-owner', async (req, res) => {
     const query = 'SELECT * FROM hostelowner WHERE reset_token = ? AND reset_token_expiry > NOW()';
     db.query(query, [token], async (err, results) => {
       if (err) {
-        console.error('Error querying database:', err);
+        console.error('[RESET] Error querying owner database:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
       }
 
-      console.log('DB results for owner token:', results);
+      console.log('[RESET] DB results for owner token:', results);
 
       if (results.length === 0) {
         return res.status(400).json({ message: 'Invalid or expired reset token' });
@@ -2027,7 +2027,7 @@ app.post('/reset-password-owner', async (req, res) => {
       const updateQuery = 'UPDATE hostelowner SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
       db.query(updateQuery, [hashedPassword, token], (err) => {
         if (err) {
-          console.error('Error updating password:', err);
+          console.error('[RESET] Error updating owner password:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
         }
 
@@ -2035,7 +2035,7 @@ app.post('/reset-password-owner', async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Error in password reset:', error);
+    console.error('[RESET] Error in owner password reset:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
