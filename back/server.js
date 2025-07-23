@@ -1816,14 +1816,16 @@ app.post('/forgot-password-student', async (req, res) => {
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
       const resetTokenExpiry = new Date(Date.now() + 3600000); // Token valid for 1 hour
+      console.log('Generated student reset token:', { email, resetToken, resetTokenExpiry });
 
       // Store reset token in database
       const updateQuery = 'UPDATE student SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
-      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err) => {
+      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err, updateResult) => {
         if (err) {
           console.error('Error updating reset token:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
         }
+        console.log('Student reset token DB update result:', updateResult);
 
         // Send reset email
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password-student/${resetToken}`;
@@ -1895,14 +1897,16 @@ app.post('/forgot-password-owner', async (req, res) => {
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
       const resetTokenExpiry = new Date(Date.now() + 3600000); // Token valid for 1 hour
+      console.log('Generated owner reset token:', { email, resetToken, resetTokenExpiry });
 
       // Store reset token in database
       const updateQuery = 'UPDATE hostelowner SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
-      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err) => {
+      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err, updateResult) => {
         if (err) {
           console.error('Error updating reset token:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
         }
+        console.log('Owner reset token DB update result:', updateResult);
 
         // Send reset email
          const resetUrl = `${process.env.FRONTEND_URL}/reset-password-owner/${resetToken}`;
@@ -2170,6 +2174,11 @@ app.get('/api/students/session', (req, res) => {
 
 // Add a global request logger to log every incoming request
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  const logMsg = `[${new Date().toISOString()}] ${req.method} ${req.url}`;
+  if (req.url.startsWith('/reset-password-student') || req.url.startsWith('/forgot-password-student') || req.url.startsWith('/api/students')) {
+    console.log('--- STUDENT ENDPOINT ---', logMsg, 'Body:', req.body);
+  } else {
+    console.log(logMsg);
+  }
   next();
 });

@@ -38,8 +38,8 @@ function ResetPassword() {
 
     try {
       const endpoint = userType === 'student'
-        ? '/reset-password-student'
-        : '/reset-password-owner';
+        ? '/student/reset-password'
+        : '/owner/reset-password';
 
       // const response = await api.post(endpoint, { token, newPassword });
       const response = await api.post(endpoint, {token,newPassword,confirmPassword});
