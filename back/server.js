@@ -219,24 +219,28 @@ const transporter = nodemailer.createTransport({
 
 //for versal 
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 
 
 
 // Connect to MySQL with better error handling
-db.connect((err) => {
+db.getConnection((err, connection) => {
     if (err) {
         console.error('Database connection failed:', err.stack);
         return;
     }
     console.log('Connected to MySQL database successfully.');
+    connection.release();
 });
 
 // Handle database connection errors
@@ -244,11 +248,12 @@ db.on('error', (err) => {
     console.error('Database error:', err);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
         console.log('Attempting to reconnect to database...');
-        db.connect((err) => {
+        db.getConnection((err, connection) => {
             if (err) {
                 console.error('Reconnection failed:', err);
             } else {
                 console.log('Reconnected to database successfully.');
+                connection.release();
             }
         });
     } else {
@@ -1946,6 +1951,7 @@ app.post('/forgot-password-owner', async (req, res) => {
 // Route to handle password reset for students
 app.post('/reset-password-student', async (req, res) => {
   const { token, newPassword } = req.body;
+  console.log('Received student reset request:', { token, newPassword: !!newPassword });
 
   if (!token || !newPassword) {
     return res.status(400).json({ message: 'Token and new password are required' });
@@ -1959,6 +1965,8 @@ app.post('/reset-password-student', async (req, res) => {
         console.error('Error querying database:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
       }
+
+      console.log('DB results for student token:', results);
 
       if (results.length === 0) {
         return res.status(400).json({ message: 'Invalid or expired reset token' });
@@ -1987,6 +1995,7 @@ app.post('/reset-password-student', async (req, res) => {
 // Route to handle password reset for owners
 app.post('/reset-password-owner', async (req, res) => {
   const { token, newPassword } = req.body;
+  console.log('Received owner reset request:', { token, newPassword: !!newPassword });
 
   if (!token || !newPassword) {
     return res.status(400).json({ message: 'Token and new password are required' });
@@ -2000,6 +2009,8 @@ app.post('/reset-password-owner', async (req, res) => {
         console.error('Error querying database:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
       }
+
+      console.log('DB results for owner token:', results);
 
       if (results.length === 0) {
         return res.status(400).json({ message: 'Invalid or expired reset token' });
@@ -2155,4 +2166,10 @@ app.get('/api/students/session', (req, res) => {
     return res.status(200).json({ loggedIn: true, student: req.session.student });
   }
   return res.status(401).json({ loggedIn: false });
+});
+
+// Add a global request logger to log every incoming request
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
 });
