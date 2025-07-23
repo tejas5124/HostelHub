@@ -4,12 +4,12 @@ import Swal from 'sweetalert2';
 import api from '../api'; // ✅ Import centralized Axios instance
 import '../styles/ResetPassword.css';
 
-function ResetPassword() {
+function ResetPassword({ userType }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { token, userType } = useParams();
+  const { token } = useParams(); // Only get token from params
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,8 +41,7 @@ function ResetPassword() {
         ? '/student/reset-password'
         : '/owner/reset-password';
 
-      // const response = await api.post(endpoint, { token, newPassword });
-      const response = await api.post(endpoint, {token,newPassword,confirmPassword});
+      const response = await api.post(endpoint, { token, newPassword });
 
       Swal.fire({
         icon: 'success',
