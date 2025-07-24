@@ -10,8 +10,11 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [userType, setUserType] = useState('');
   const navigate = useNavigate();
-  const { token } = useParams();
+  const params = useParams();
   const location = useLocation();
+  
+  // Get token from params
+  const token = params.token;
 
   useEffect(() => {
     // Extract userType from the current path
@@ -20,14 +23,18 @@ function ResetPassword() {
     
     if (path.includes('/reset-password-student/')) {
       setUserType('student');
+      console.log('Detected userType: student');
     } else if (path.includes('/reset-password-owner/')) {
       setUserType('owner');
+      console.log('Detected userType: owner');
+    } else if (params.userType) {
+      // Fallback for route pattern /reset-password/:userType/:token
+      setUserType(params.userType);
+      console.log('Detected userType from params:', params.userType);
     } else {
-      // Fallback - try to get from URL params if the route is still /reset-password/:userType/:token
-      const { userType: paramUserType } = useParams();
-      setUserType(paramUserType);
+      console.error('Could not determine userType from path:', path);
     }
-  }, [location.pathname]);
+  }, [location.pathname, params.userType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,14 +125,24 @@ function ResetPassword() {
     }
   };
 
+  // Show loading while determining userType
+  if (!userType) {
+    return (
+      <div className="reset-password-container">
+        <div className="reset-password-card">
+          <h2>Loading...</h2>
+          <p>Validating reset link...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="reset-password-container">
       <div className="reset-password-card">
         <h2>Reset Password</h2>
         <p>Please enter your new password below.</p>
-        {userType && (
-          <p><small>Resetting password for: {userType}</small></p>
-        )}
+        <p><small>Resetting password for: {userType}</small></p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -145,7 +162,7 @@ function ResetPassword() {
               required
             />
           </div>
-          <button type="submit" className="submit-button" disabled={loading || !userType}>
+          <button type="submit" className="submit-button" disabled={loading}>
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
