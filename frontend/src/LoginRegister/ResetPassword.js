@@ -19,25 +19,33 @@ function ResetPassword() {
   useEffect(() => {
     // Extract userType from the current path
     const path = location.pathname;
-    console.log('Current path:', path);
+    console.log('🔍 Current path:', path);
+    console.log('🔍 Full location:', location);
+    console.log('🔍 Params:', params);
     
     if (path.includes('/reset-password-student/')) {
       setUserType('student');
-      console.log('Detected userType: student');
+      console.log('✅ Detected userType: student');
     } else if (path.includes('/reset-password-owner/')) {
       setUserType('owner');
-      console.log('Detected userType: owner');
+      console.log('✅ Detected userType: owner');
     } else if (params.userType) {
       // Fallback for route pattern /reset-password/:userType/:token
       setUserType(params.userType);
-      console.log('Detected userType from params:', params.userType);
+      console.log('✅ Detected userType from params:', params.userType);
     } else {
-      console.error('Could not determine userType from path:', path);
+      console.error('❌ Could not determine userType from path:', path);
+      console.error('❌ Available params:', Object.keys(params));
     }
-  }, [location.pathname, params.userType]);
+  }, [location.pathname, params.userType, params, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    console.log('🚀 Form submitted with:');
+    console.log('  - UserType:', userType);
+    console.log('  - Token:', token);
+    console.log('  - Password length:', newPassword.length);
     
     if (!userType) {
       Swal.fire({
@@ -84,16 +92,19 @@ function ResetPassword() {
         ? '/reset-password-student'
         : '/reset-password-owner';
       
-      console.log('User Type:', userType);
-      console.log('Sending request to:', endpoint);
-      console.log('With data:', { token, newPassword });
+      console.log('📡 Request Details:');
+      console.log('  - User Type:', userType);
+      console.log('  - Endpoint:', endpoint);
+      console.log('  - Token:', token);
+      console.log('  - Token length:', token.length);
+      console.log('  - Password provided:', !!newPassword);
       
       const response = await api.post(endpoint, { 
         token, 
         newPassword 
       });
       
-      console.log('Success response:', response.data);
+      console.log('✅ Success response:', response.data);
       
       Swal.fire({
         icon: 'success',
@@ -104,8 +115,10 @@ function ResetPassword() {
       navigate(userType === 'student' ? '/student-login' : '/owner-login');
       
     } catch (error) {
-      console.error('Reset Error:', error);
-      console.error('Error Response:', error?.response?.data);
+      console.error('❌ Reset Error:', error);
+      console.error('❌ Error Response:', error?.response?.data);
+      console.error('❌ Error Status:', error?.response?.status);
+      console.error('❌ Request Config:', error?.config);
       
       let errorMessage = 'Something went wrong. Please try again.';
       
@@ -132,6 +145,12 @@ function ResetPassword() {
         <div className="reset-password-card">
           <h2>Loading...</h2>
           <p>Validating reset link...</p>
+          <div style={{ marginTop: '10px', padding: '10px', background: '#f0f0f0', fontSize: '12px' }}>
+            <strong>Debug Info:</strong><br/>
+            Path: {location.pathname}<br/>
+            Token: {token}<br/>
+            Params: {JSON.stringify(params)}
+          </div>
         </div>
       </div>
     );
@@ -142,7 +161,17 @@ function ResetPassword() {
       <div className="reset-password-card">
         <h2>Reset Password</h2>
         <p>Please enter your new password below.</p>
-        <p><small>Resetting password for: {userType}</small></p>
+        <p><small>Resetting password for: <strong>{userType}</strong></small></p>
+        
+        {/* Debug Info */}
+        <div style={{ marginBottom: '20px', padding: '10px', background: '#f9f9f9', border: '1px solid #ddd', fontSize: '12px' }}>
+          <strong>Debug Info:</strong><br/>
+          Current Path: {location.pathname}<br/>
+          Detected User Type: {userType}<br/>
+          Token: {token ? `${token.substring(0, 10)}...` : 'None'}<br/>
+          Token Length: {token ? token.length : 0}
+        </div>
+        
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
