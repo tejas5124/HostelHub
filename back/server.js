@@ -146,7 +146,7 @@
 
 
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -216,41 +216,61 @@ const transporter = nodemailer.createTransport({
 
 //for versal 
 
-const db = mysql.createConnection({
+// Create connection pool instead of single connection
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
+  idleTimeout: 300000,
+  maxIdle: 10,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 });
 
+// Query wrapper function for backward compatibility
+function dbQuery(sql, params, callback) {
+  if (typeof params === 'function') {
+    callback = params;
+    params = [];
+  }
+  
+  pool.execute(sql, params)
+    .then(([results]) => callback(null, results))
+    .catch(error => {
+      console.error('Database query error:', error);
+      callback(error);
+    });
+}
 
+// Test the connection
+(async () => {
+  try {
+    const [results] = await pool.execute('SELECT 1');
+    console.log('✅ Connected to MySQL database successfully with connection pool.');
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+  }
+})();
 
-
-// Connect to MySQL with better error handling
-db.connect((err) => {
-    if (err) {
-        console.error('Database connection failed:', err.stack);
-        return;
-    }
-    console.log('Connected to MySQL database successfully.');
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  await pool.end();
+  process.exit(0);
 });
 
-// Handle database connection errors
-db.on('error', (err) => {
-    console.error('Database error:', err);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-        console.log('Attempting to reconnect to database...');
-        db.connect((err) => {
-            if (err) {
-                console.error('Reconnection failed:', err);
-            } else {
-                console.log('Reconnected to database successfully.');
-            }
-        });
-    } else {
-        throw err;
-    }
+process.on('SIGTERM', async () => {
+  console.log('Shutting down gracefully...');
+  await pool.end();
+  process.exit(0);
 });
 
 // Middleware
@@ -300,7 +320,7 @@ app.post('/login', (req, res) => {
   }
 
   const query = 'SELECT * FROM student WHERE email = ?';
-  db.query(query, [email], (err, results) => {
+  dbQuery(query, [email], (err, results) => {
     if (err) {
       console.error('Error querying database:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -355,7 +375,7 @@ app.post('/register', async (req, res) => {
     const query = 'INSERT INTO student (name, email, password, date_of_birth, phone_number, gender, address) VALUES (?, ?, ?, ?, ?, ?, ?)';
     const values = [name, email, hashedPassword, date_of_birth, phone_number, gender, address];
 
-    db.query(query, values, (err, results) => {
+    dbQuery(query, values, (err, results) => {
       if (err) 
       {
         console.error('Error inserting data:', err);
@@ -393,7 +413,7 @@ app.get('/owner-session', (req, res) => {
 //   }
 
 //   const query = 'SELECT * FROM hostelowner WHERE email = ?';
-//   db.query(query, [email], (err, results) => {
+//   dbQuery(query, [email], (err, results) => {
 //     if (err) {
 //       console.error('Error querying database:', err);
 //       return res.status(500).json({ message: 'Internal Server Error' });
@@ -434,7 +454,7 @@ app.post('/owner-login', (req, res) => {
   }
 
   const query = 'SELECT * FROM hostelowner WHERE email = ?';
-  db.query(query, [email], (err, results) => {
+  dbQuery(query, [email], (err, results) => {
     if (err) {
       console.error('Error querying database:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -491,7 +511,7 @@ app.post('/register_owner', async (req, res) => {
     const query = 'INSERT INTO hostelowner (name, email, password, phone_number, address) VALUES (?, ?, ?, ?, ?)';
     const values = [name, email, hashedPassword, phone_number, address];
 
-    db.query(query, values, (err, results) => {
+    dbQuery(query, values, (err, results) => {
       if (err) {
         console.error('Error inserting data:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -512,7 +532,7 @@ app.post('/admin-login', (req, res) => {
   }
 
   const query = 'SELECT * FROM collegeadministration WHERE email = ?';
-  db.query(query, [email], (err, results) => {
+  dbQuery(query, [email], (err, results) => {
     if (err) {
       console.error('Error querying database:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -571,7 +591,7 @@ app.post('/register_admin', async (req, res) => {
     const query = 'INSERT INTO collegeadministration (name, email, password, phone_number, position) VALUES (?, ?, ?, ?, ?)';
     const values = [name, email, hashedPassword, phone_number, position];
 
-    db.query(query, values, (err, results) => {
+    dbQuery(query, values, (err, results) => {
       if (err) {
         console.error('Error inserting data:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -667,7 +687,7 @@ app.post("/add-hostel", upload.single("image"), (req, res) => {
     hostel_gender
   ];
 
-  db.query(query, values, (err, results) => {
+  dbQuery(query, values, (err, results) => {
     if (err) {
       console.error("Error inserting data:", err);
       return res.status(500).json({ message: "Internal Server Error" });
@@ -687,7 +707,7 @@ app.post("/add-hostel", upload.single("image"), (req, res) => {
 //     WHERE owner_id = ?
 //   `;
 
-//   db.query(query, [ownerId], (err, results) => {
+//   dbQuery(query, [ownerId], (err, results) => {
 //     if (err) {
 //       console.error('Error fetching hostels:', err);
 //       return res.status(500).json({ message: 'Internal Server Error' });
@@ -711,7 +731,7 @@ app.get('/owner-hostels/:ownerId', (req, res) => {
     WHERE owner_id = ?
   `;
 
-  db.query(query, [ownerId], (err, results) => {
+  dbQuery(query, [ownerId], (err, results) => {
     if (err) {
       console.error('Error fetching hostels:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -747,7 +767,7 @@ app.delete('/remove-hostel', (req, res) => {
   }
 
   const deleteQuery = 'DELETE FROM hosteldetails WHERE hostel_id = ?';
-  db.query(deleteQuery, [hostel_id], (err, results) => {
+  dbQuery(deleteQuery, [hostel_id], (err, results) => {
     if (err) {
       console.error('Error deleting hostel:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -767,7 +787,7 @@ app.delete('/remove-hostel', (req, res) => {
 
 app.get('/api/hostels', (req, res) => {
   const sql = 'SELECT owner_id,hostel_id,name,address,description,total_rooms,available_rooms,rent,approval_status FROM hosteldetails';
-  db.query(sql, (err, results) => {
+  dbQuery(sql, (err, results) => {
     if (err) {
       console.error('Error fetching hostel details:', err);
       res.status(500).json({ message: 'Error fetching hostel details' });
@@ -787,7 +807,7 @@ app.get('/api/students', (req, res) => {
     LEFT JOIN bookings b ON s.student_id = b.student_id AND b.booking_status = 'approved'
     LEFT JOIN hosteldetails h ON b.hostel_id = h.hostel_id
   `;
-  db.query(sql, (err, results) => {
+  dbQuery(sql, (err, results) => {
     if (err) throw err;
     res.json(results);
   });
@@ -797,7 +817,7 @@ app.delete('/api/students/:id', (req, res) => {
   const studentId = req.params.id;
   const query = 'DELETE FROM student WHERE student_id = ?';
   
-  db.query(query, [studentId], (err, results) => {
+  dbQuery(query, [studentId], (err, results) => {
     if (err) {
       console.error('Error deleting student:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -851,7 +871,7 @@ app.put('/update-hostel', (req, res) => {
                      address = ?, description = ?, facilities = ?
                  WHERE hostel_id = ? AND owner_id = ?`;
 
-  db.query(query, [
+  dbQuery(query, [
     name,
     total_rooms,
     available_rooms,
@@ -892,7 +912,7 @@ app.post('/api/hostels/approve/:hostelId', (req, res) => {
   const values = ['approved', hostelId];
 
   // Execute the query
-  db.query(query, values, (err, results) => {
+  dbQuery(query, values, (err, results) => {
     if (err) {
       console.error('Error updating hostel approval status:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -907,27 +927,23 @@ app.post('/api/hostels/approve/:hostelId', (req, res) => {
 });
 // In your backend file (e.g., `index.js` or `api.js`)
 
-app.get('/api/hostels/non-approved', async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      'SELECT * FROM hosteldetails WHERE approval_status = "not approved"'
-    );
+app.get('/api/hostels/non-approved', (req, res) => {
+  dbQuery('SELECT * FROM hosteldetails WHERE approval_status = "not approved"', (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
     res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  });
 });
-app.post('/api/hostels/approve/:id', async (req, res) => {
+
+app.post('/api/hostels/approve/:id', (req, res) => {
   const hostelId = req.params.id;
-  try {
-    await pool.query(
-      'UPDATE hosteldetails SET approval_status = "approved" WHERE hostel_id = ?',
-      [hostelId]
-    );
+  dbQuery('UPDATE hosteldetails SET approval_status = "approved" WHERE hostel_id = ?', [hostelId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
     res.status(200).json({ message: 'Hostel approved successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  });
 });
 
 
@@ -945,7 +961,7 @@ app.post('/api/hostels/reject/:hostelId', (req, res) => {
   const values = ['rejected', hostelId];
 
   // Execute the query
-  db.query(query, values, (err, results) => {
+  dbQuery(query, values, (err, results) => {
     if (err) {
       console.error('Error updating hostel rejection status:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -974,7 +990,7 @@ app.get('/api/owner-hostels', (req, res) => {
   const ownerId = req.session.user.id;
   const query = 'SELECT * FROM hosteldetails WHERE owner_id = ?';
 
-  db.query(query, [ownerId], (err, results) => {
+  dbQuery(query, [ownerId], (err, results) => {
     if (err) {
       console.error('Error fetching hostels:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -1006,7 +1022,7 @@ app.get('/all-hostels', (req, res) => {
     FROM hosteldetails
   `;
 
-  db.query(query, (err, results) => {
+  dbQuery(query, (err, results) => {
     if (err) {
       console.error('Error fetching hostels:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -1022,9 +1038,9 @@ app.get('/all-hostels', (req, res) => {
 
 app.get('/hostel-stats', async (req, res) => {
   try {
-    const totalHostels = await db.query('SELECT COUNT(*) AS total FROM hostels');
-    const approvedHostels = await db.query("SELECT COUNT(*) AS approved FROM hostels WHERE approval_status = 'approved'");
-    const rejectedHostels = await db.query("SELECT COUNT(*) AS rejected FROM hostels WHERE approval_status = 'rejected'");
+    const totalHostels = await dbQuery('SELECT COUNT(*) AS total FROM hostels');
+    const approvedHostels = await dbQuery("SELECT COUNT(*) AS approved FROM hostels WHERE approval_status = 'approved'");
+    const rejectedHostels = await dbQuery("SELECT COUNT(*) AS rejected FROM hostels WHERE approval_status = 'rejected'");
     
     res.json({
       total: totalHostels[0].total,
@@ -1041,7 +1057,7 @@ app.get('/hostel-stats', async (req, res) => {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/stu_hostels', (req, res) => {
-  db.query(
+  dbQuery(
       'SELECT hostel_id, name, rent, address, description, total_rooms, available_rooms, approval_status, facilities, image_path FROM hosteldetails WHERE approval_status = "approved"',
       (error, rows) => {
           if (error) {
@@ -1062,13 +1078,13 @@ app.post('/book_hostel/:hostelId', (req, res) => {
   const { hostelId } = req.params;
 
   // Fetch hostel_owner_id based on hostelId
-  db.query('SELECT owner_id FROM hosteldetails WHERE hostel_id = ?', [hostelId], (error, results) => {
+  dbQuery('SELECT owner_id FROM hosteldetails WHERE hostel_id = ?', [hostelId], (error, results) => {
       if (error) return res.status(500).json({ error: error.message });
 
       const hostelOwnerId = results[0]?.owner_id;
 
       // Insert booking into the database
-      db.query(
+      dbQuery(
           'INSERT INTO bookings (student_id, hostel_id, rent, room_number, booking_date, hostel_owner_id) VALUES (?, ?, ?, ?, ?, ?)',
           [student_id, hostelId, rent, room_number, booking_date, hostelOwnerId],
           (error, results) => {
@@ -1093,7 +1109,7 @@ app.post('/update_payment_status/:bookingId', (req, res) => {
   }
 
   const query = 'UPDATE bookings SET payment_status = ? WHERE booking_id = ?';
-  db.query(query, [payment_status, bookingId], (err) => {
+  dbQuery(query, [payment_status, bookingId], (err) => {
       if (err) {
           console.error('Error updating payment status:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
@@ -1110,7 +1126,7 @@ app.get('/student-details/:id', (req, res) => {
   const studentId = req.params.id;
   const query = 'SELECT student_id, name, email, phone_number, gender, address FROM student WHERE student_id = ?';
   
-  db.query(query, [studentId], (err, results) => {
+  dbQuery(query, [studentId], (err, results) => {
     if (err) {
       console.error('Error fetching student details:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -1140,13 +1156,13 @@ app.get('/student-stats/:id', (req, res) => {
     AND (end_date IS NULL OR end_date >= CURDATE())
   `;
   
-  db.query(totalBookingsQuery, [studentId], (err, totalResults) => {
+  dbQuery(totalBookingsQuery, [studentId], (err, totalResults) => {
     if (err) {
       console.error('Error fetching total bookings:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
     }
     
-    db.query(activeBookingsQuery, [studentId], (err, activeResults) => {
+    dbQuery(activeBookingsQuery, [studentId], (err, activeResults) => {
       if (err) {
         console.error('Error fetching active bookings:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -1165,7 +1181,7 @@ app.get('/owner-details/:id', (req, res) => {
   const ownerId = req.params.id;
   const query = 'SELECT owner_id, name, email, phone_number, address FROM hostelowner WHERE owner_id = ?';
   
-  db.query(query, [ownerId], (err, results) => {
+  dbQuery(query, [ownerId], (err, results) => {
     if (err) {
       console.error('Error fetching owner details:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -1184,7 +1200,7 @@ app.get('/admin-details/:id', (req, res) => {
   const adminId = req.params.id;
   const query = 'SELECT admin_id, name, email, phone_number, position FROM collegeadministration WHERE admin_id = ?';
   
-  db.query(query, [adminId], (err, results) => {
+  dbQuery(query, [adminId], (err, results) => {
     if (err) {
       console.error('Error fetching admin details:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -1213,58 +1229,65 @@ server.on('error', (err) => {
 });
 
 // Route to get owner dashboard statistics
-app.get('/owner-stats/:ownerId', async (req, res) => {
+app.get('/owner-stats/:ownerId', (req, res) => {
   const ownerId = req.params.ownerId;
 
-  try {
-    // Get total hostels
-    const [totalHostels] = await db.query(
-      'SELECT COUNT(*) as count FROM hosteldetails WHERE owner_id = ?',
-      [ownerId]
-    );
+  // Get total hostels
+  dbQuery('SELECT COUNT(*) as count FROM hosteldetails WHERE owner_id = ?', [ownerId], (err, totalHostels) => {
+    if (err) {
+      console.error('Error fetching total hostels:', err);
+      return res.status(500).json({ message: 'Error fetching owner statistics' });
+    }
 
     // Get approved hostels
-    const [approvedHostels] = await db.query(
-      'SELECT COUNT(*) as count FROM hosteldetails WHERE owner_id = ? AND approval_status = "approved"',
-      [ownerId]
-    );
+    dbQuery('SELECT COUNT(*) as count FROM hosteldetails WHERE owner_id = ? AND approval_status = "approved"', [ownerId], (err, approvedHostels) => {
+      if (err) {
+        console.error('Error fetching approved hostels:', err);
+        return res.status(500).json({ message: 'Error fetching owner statistics' });
+      }
 
-    // Get total available rooms
-    const [availableRooms] = await db.query(
-      'SELECT SUM(available_rooms) as total FROM hosteldetails WHERE owner_id = ?',
-      [ownerId]
-    );
+      // Get total available rooms
+      dbQuery('SELECT SUM(available_rooms) as total FROM hosteldetails WHERE owner_id = ?', [ownerId], (err, availableRooms) => {
+        if (err) {
+          console.error('Error fetching available rooms:', err);
+          return res.status(500).json({ message: 'Error fetching owner statistics' });
+        }
 
-    // Get total students (from bookings)
-    const [totalStudents] = await db.query(
-      'SELECT COUNT(DISTINCT student_id) as count FROM bookings WHERE hostel_owner_id = ?',
-      [ownerId]
-    );
+        // Get total students (from bookings)
+        dbQuery('SELECT COUNT(DISTINCT student_id) as count FROM bookings WHERE hostel_owner_id = ?', [ownerId], (err, totalStudents) => {
+          if (err) {
+            console.error('Error fetching total students:', err);
+            return res.status(500).json({ message: 'Error fetching owner statistics' });
+          }
 
-    // Get pending bookings
-    const [pendingBookings] = await db.query(
-      'SELECT COUNT(*) as count FROM bookings WHERE hostel_owner_id = ? AND status = "pending"',
-      [ownerId]
-    );
+          // Get pending bookings
+          dbQuery('SELECT COUNT(*) as count FROM bookings WHERE hostel_owner_id = ? AND booking_status = "pending"', [ownerId], (err, pendingBookings) => {
+            if (err) {
+              console.error('Error fetching pending bookings:', err);
+              return res.status(500).json({ message: 'Error fetching owner statistics' });
+            }
 
-    // Get total revenue
-    const [totalRevenue] = await db.query(
-      'SELECT SUM(rent) as total FROM bookings WHERE hostel_owner_id = ? AND status = "approved"',
-      [ownerId]
-    );
+            // Get total revenue
+            dbQuery('SELECT SUM(total_amount) as total FROM bookings WHERE hostel_owner_id = ? AND booking_status = "approved"', [ownerId], (err, totalRevenue) => {
+              if (err) {
+                console.error('Error fetching total revenue:', err);
+                return res.status(500).json({ message: 'Error fetching owner statistics' });
+              }
 
-    res.json({
-      totalHostels: totalHostels[0].count || 0,
-      approvedHostels: approvedHostels[0].count || 0,
-      availableRooms: availableRooms[0].total || 0,
-      totalStudents: totalStudents[0].count || 0,
-      pendingBookings: pendingBookings[0].count || 0,
-      totalRevenue: totalRevenue[0].total || 0
+              res.json({
+                totalHostels: totalHostels[0]?.count || 0,
+                approvedHostels: approvedHostels[0]?.count || 0,
+                availableRooms: availableRooms[0]?.total || 0,
+                totalStudents: totalStudents[0]?.count || 0,
+                pendingBookings: pendingBookings[0]?.count || 0,
+                totalRevenue: totalRevenue[0]?.total || 0
+              });
+            });
+          });
+        });
+      });
     });
-  } catch (error) {
-    console.error('Error fetching owner stats:', error);
-    res.status(500).json({ message: 'Error fetching owner statistics' });
-  }
+  });
 });
 
 
@@ -1287,7 +1310,7 @@ app.get('/student-session', (req, res) => {
 //         console.log('Received booking request:', req.body); // Debug log
 
 //         // First check if the hostel has available rooms
-//         db.query(
+//         dbQuery(
 //             'SELECT available_rooms FROM hosteldetails WHERE hostel_id = ?',
 //             [hostel_id],
 //             (err, hostelResults) => {
@@ -1330,7 +1353,7 @@ app.get('/student-session', (req, res) => {
 
 //                 console.log('Executing booking query with values:', bookingValues);
 
-//                 db.query(bookingQuery, bookingValues, (err, result) => {
+//                 dbQuery(bookingQuery, bookingValues, (err, result) => {
 //                     if (err) {
 //                         console.error('Error inserting booking:', err);
 //                         return res.status(500).json({ message: 'Error adding booking request' });
@@ -1370,7 +1393,7 @@ app.post('/add-booking', async (req, res) => {
     }
 
     // ✅ Check availability
-    db.query(
+    dbQuery(
         'SELECT available_rooms FROM hosteldetails WHERE hostel_id = ?',
         [hostel_id],
         (err, hostelResults) => {
@@ -1411,7 +1434,7 @@ app.post('/add-booking', async (req, res) => {
 
             console.log('📦 Executing booking query with values:', bookingValues);
 
-            db.query(bookingQuery, bookingValues, (err, result) => {
+            dbQuery(bookingQuery, bookingValues, (err, result) => {
                 if (err) {
                     console.error('❌ Error inserting booking:', err);
                     return res.status(500).json({ message: 'Error adding booking request' });
@@ -1436,7 +1459,7 @@ app.get('/owner-bookings/:owner_id', (req, res) => {
     // First verify if the owner exists
     const ownerCheckQuery = 'SELECT owner_id FROM hostelowner WHERE owner_id = ?';
     
-    db.query(ownerCheckQuery, [owner_id], (err, ownerResults) => {
+    dbQuery(ownerCheckQuery, [owner_id], (err, ownerResults) => {
         if (err) {
             console.error('Error checking owner:', err);
             return res.status(500).json({ message: 'Error verifying owner' });
@@ -1466,7 +1489,7 @@ app.get('/owner-bookings/:owner_id', (req, res) => {
 
         console.log('Executing bookings query for owner:', owner_id); // Debug log
 
-        db.query(query, [owner_id], (err, results) => {
+        dbQuery(query, [owner_id], (err, results) => {
             if (err) {
                 console.error('Error fetching owner bookings:', err);
                 return res.status(500).json({ 
@@ -1498,7 +1521,7 @@ app.put('/update-booking-status/:booking_id', (req, res) => {
         WHERE b.booking_id = ?
     `;
 
-    db.query(checkQuery, [booking_id], (err, results) => {
+    dbQuery(checkQuery, [booking_id], (err, results) => {
         if (err) {
             console.error('Error checking booking details:', err);
             return res.status(500).json({ message: 'Error checking booking details' });
@@ -1527,7 +1550,7 @@ app.put('/update-booking-status/:booking_id', (req, res) => {
             // First update the booking status
             const bookingUpdateQuery = 'UPDATE bookings SET booking_status = ? WHERE booking_id = ?';
             
-            db.query(bookingUpdateQuery, [status, booking_id], (err) => {
+            dbQuery(bookingUpdateQuery, [status, booking_id], (err) => {
                 if (err) {
                     console.error('Error updating booking status:', err);
                     return res.status(500).json({ message: 'Error updating booking status' });
@@ -1543,7 +1566,7 @@ app.put('/update-booking-status/:booking_id', (req, res) => {
                 const newAvailableRooms = availableRooms - 1;
                 console.log('New Available Rooms:', newAvailableRooms);
 
-                db.query(roomUpdateQuery, [newAvailableRooms, hostelId], (err, result) => {
+                dbQuery(roomUpdateQuery, [newAvailableRooms, hostelId], (err, result) => {
                     if (err) {
                         console.error('Error updating available rooms:', err);
                         return res.status(500).json({ message: 'Error updating available rooms' });
@@ -1563,7 +1586,7 @@ app.put('/update-booking-status/:booking_id', (req, res) => {
             // First update the booking status
             const bookingUpdateQuery = 'UPDATE bookings SET booking_status = ? WHERE booking_id = ?';
             
-            db.query(bookingUpdateQuery, [status, booking_id], (err) => {
+            dbQuery(bookingUpdateQuery, [status, booking_id], (err) => {
                 if (err) {
                     console.error('Error updating booking status:', err);
                     return res.status(500).json({ message: 'Error updating booking status' });
@@ -1579,7 +1602,7 @@ app.put('/update-booking-status/:booking_id', (req, res) => {
                 const newAvailableRooms = availableRooms + 1;
                 console.log('New Available Rooms:', newAvailableRooms);
 
-                db.query(roomUpdateQuery, [newAvailableRooms, hostelId], (err, result) => {
+                dbQuery(roomUpdateQuery, [newAvailableRooms, hostelId], (err, result) => {
                     if (err) {
                         console.error('Error updating available rooms:', err);
                         return res.status(500).json({ message: 'Error updating available rooms' });
@@ -1599,7 +1622,7 @@ app.put('/update-booking-status/:booking_id', (req, res) => {
             // For other status changes (like pending or rejecting a pending booking)
             const updateQuery = 'UPDATE bookings SET booking_status = ? WHERE booking_id = ?';
             
-            db.query(updateQuery, [status, booking_id], (err) => {
+            dbQuery(updateQuery, [status, booking_id], (err) => {
                 if (err) {
                     console.error('Error updating booking status:', err);
                     return res.status(500).json({ message: 'Error updating booking status' });
@@ -1617,7 +1640,7 @@ app.put('/update-payment-status/:booking_id', (req, res) => {
     
     const query = 'UPDATE bookings SET payment_status = ? WHERE booking_id = ?';
     
-    db.query(query, [status, booking_id], (err) => {
+    dbQuery(query, [status, booking_id], (err) => {
         if (err) {
             console.error('Error updating payment status:', err);
             return res.status(500).json({ message: 'Error updating payment status' });
@@ -1634,7 +1657,7 @@ app.get('/student-bookings/:student_id', (req, res) => {
     // First verify if the student exists
     const studentCheckQuery = 'SELECT student_id FROM student WHERE student_id = ?';
     
-    db.query(studentCheckQuery, [student_id], (err, studentResults) => {
+    dbQuery(studentCheckQuery, [student_id], (err, studentResults) => {
         if (err) {
             console.error('Error checking student:', err);
             return res.status(500).json({ message: 'Error verifying student' });
@@ -1661,7 +1684,7 @@ app.get('/student-bookings/:student_id', (req, res) => {
             ORDER BY b.created_at DESC
         `;
 
-        db.query(query, [student_id], (err, results) => {
+        dbQuery(query, [student_id], (err, results) => {
             if (err) {
                 console.error('Error fetching student bookings:', err);
                 return res.status(500).json({ 
@@ -1689,7 +1712,7 @@ app.put('/update-student/:student_id', (req, res) => {
 
     // First check if student exists
     const checkQuery = 'SELECT student_id FROM student WHERE student_id = ?';
-    db.query(checkQuery, [studentId], (err, results) => {
+    dbQuery(checkQuery, [studentId], (err, results) => {
         if (err) {
             console.error('Error checking student:', err);
             return res.status(500).json({ error: 'Internal server error' });
@@ -1701,7 +1724,7 @@ app.put('/update-student/:student_id', (req, res) => {
 
         // Update the phone number
         const updateQuery = 'UPDATE student SET phone_number = ? WHERE student_id = ?';
-        db.query(updateQuery, [phone_number, studentId], (err, result) => {
+        dbQuery(updateQuery, [phone_number, studentId], (err, result) => {
             if (err) {
                 console.error('Error updating student:', err);
                 return res.status(500).json({ error: 'Internal server error' });
@@ -1713,7 +1736,7 @@ app.put('/update-student/:student_id', (req, res) => {
 
             // Fetch updated student details
             const fetchQuery = 'SELECT * FROM student WHERE student_id = ?';
-            db.query(fetchQuery, [studentId], (err, updatedResults) => {
+            dbQuery(fetchQuery, [studentId], (err, updatedResults) => {
                 if (err) {
                     console.error('Error fetching updated student:', err);
                     return res.status(500).json({ error: 'Internal server error' });
@@ -1739,7 +1762,7 @@ app.put('/update-owner/:owner_id', (req, res) => {
 
     // First check if owner exists
     const checkQuery = 'SELECT owner_id FROM hostelowner WHERE owner_id = ?';
-    db.query(checkQuery, [ownerId], (err, results) => {
+    dbQuery(checkQuery, [ownerId], (err, results) => {
         if (err) {
             console.error('Error checking owner:', err);
             return res.status(500).json({ error: 'Internal server error' });
@@ -1751,7 +1774,7 @@ app.put('/update-owner/:owner_id', (req, res) => {
 
         // Update the phone number
         const updateQuery = 'UPDATE hostelowner SET phone_number = ? WHERE owner_id = ?';
-        db.query(updateQuery, [phone_number, ownerId], (err, result) => {
+        dbQuery(updateQuery, [phone_number, ownerId], (err, result) => {
             if (err) {
                 console.error('Error updating owner:', err);
                 return res.status(500).json({ error: 'Internal server error' });
@@ -1763,7 +1786,7 @@ app.put('/update-owner/:owner_id', (req, res) => {
 
             // Fetch updated owner details
             const fetchQuery = 'SELECT * FROM hostelowner WHERE owner_id = ?';
-            db.query(fetchQuery, [ownerId], (err, updatedResults) => {
+            dbQuery(fetchQuery, [ownerId], (err, updatedResults) => {
                 if (err) {
                     console.error('Error fetching updated owner:', err);
                     return res.status(500).json({ error: 'Internal server error' });
@@ -1788,7 +1811,7 @@ app.post('/forgot-password-owner', async (req, res) => {
   try {
     // Check if email exists
     const query = 'SELECT * FROM hostelowner WHERE email = ?';
-    db.query(query, [email], async (err, results) => {
+    dbQuery(query, [email], async (err, results) => {
       if (err) {
         console.error('Error querying database:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -1809,7 +1832,7 @@ app.post('/forgot-password-owner', async (req, res) => {
 
       // Store reset token in database
       const updateQuery = 'UPDATE hostelowner SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
-      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err, result) => {
+      dbQuery(updateQuery, [resetToken, resetTokenExpiry, email], async (err, result) => {
         if (err) {
           console.error('Error updating reset token:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
@@ -1875,7 +1898,7 @@ app.post('/forgot-password-student', async (req, res) => {
   try {
     // Check if email exists
     const query = 'SELECT * FROM student WHERE email = ?';
-    db.query(query, [email], async (err, results) => {
+    dbQuery(query, [email], async (err, results) => {
       if (err) {
         console.error('Error querying database:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -1896,7 +1919,7 @@ app.post('/forgot-password-student', async (req, res) => {
 
       // Store reset token in database
       const updateQuery = 'UPDATE student SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
-      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err, result) => {
+      dbQuery(updateQuery, [resetToken, resetTokenExpiry, email], async (err, result) => {
         if (err) {
           console.error('Error updating reset token:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
@@ -1968,7 +1991,7 @@ app.post('/reset-password-owner', async (req, res) => {
   try {
     // First, let's check if the token exists at all
     const checkTokenQuery = 'SELECT owner_id, email, reset_token, reset_token_expiry FROM hostelowner WHERE reset_token = ?';
-    db.query(checkTokenQuery, [token], async (err, tokenResults) => {
+    dbQuery(checkTokenQuery, [token], async (err, tokenResults) => {
       if (err) {
         console.error('❌ Error checking token:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -1985,7 +2008,7 @@ app.post('/reset-password-owner', async (req, res) => {
 
       // Now check with expiry validation
       const query = 'SELECT * FROM hostelowner WHERE reset_token = ? AND reset_token_expiry > NOW()';
-      db.query(query, [token], async (err, results) => {
+      dbQuery(query, [token], async (err, results) => {
         if (err) {
           console.error('❌ Error querying database:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
@@ -2014,7 +2037,7 @@ app.post('/reset-password-owner', async (req, res) => {
 
         // Update password and clear reset token
         const updateQuery = 'UPDATE hostelowner SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
-        db.query(updateQuery, [hashedPassword, token], (err, result) => {
+        dbQuery(updateQuery, [hashedPassword, token], (err, result) => {
           if (err) {
             console.error('❌ Error updating password:', err);
             return res.status(500).json({ message: 'Internal Server Error' });
@@ -2048,7 +2071,7 @@ app.post('/reset-password-student', async (req, res) => {
   try {
     // First, let's check if the token exists at all
     const checkTokenQuery = 'SELECT student_id, email, reset_token, reset_token_expiry FROM student WHERE reset_token = ?';
-    db.query(checkTokenQuery, [token], async (err, tokenResults) => {
+    dbQuery(checkTokenQuery, [token], async (err, tokenResults) => {
       if (err) {
         console.error('❌ Error checking token:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -2065,7 +2088,7 @@ app.post('/reset-password-student', async (req, res) => {
 
       // Now check with expiry validation
       const query = 'SELECT * FROM student WHERE reset_token = ? AND reset_token_expiry > NOW()';
-      db.query(query, [token], async (err, results) => {
+      dbQuery(query, [token], async (err, results) => {
         if (err) {
           console.error('❌ Error querying database:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
@@ -2094,7 +2117,7 @@ app.post('/reset-password-student', async (req, res) => {
 
         // Update password and clear reset token
         const updateQuery = 'UPDATE student SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
-        db.query(updateQuery, [hashedPassword, token], (err, result) => {
+        dbQuery(updateQuery, [hashedPassword, token], (err, result) => {
           if (err) {
             console.error('❌ Error updating password:', err);
             return res.status(500).json({ message: 'Internal Server Error' });
@@ -2121,7 +2144,7 @@ app.put('/student-update/:student_id', (req, res) => {
   }
 
   const updateQuery = 'UPDATE student SET email = ?, phone_number = ? WHERE student_id = ?';
-  db.query(updateQuery, [email, phone_number, studentId], (err, result) => {
+  dbQuery(updateQuery, [email, phone_number, studentId], (err, result) => {
     if (err) {
       console.error('Error updating student:', err);
       return res.status(500).json({ message: 'Internal server error' });
@@ -2143,7 +2166,7 @@ app.put('/owner-update/:owner_id', (req, res) => {
   }
 
   const updateQuery = 'UPDATE hostelowner SET email = ?, phone_number = ? WHERE owner_id = ?';
-  db.query(updateQuery, [email, phone_number, ownerId], (err, result) => {
+  dbQuery(updateQuery, [email, phone_number, ownerId], (err, result) => {
     if (err) {
       console.error('Error updating owner:', err);
       return res.status(500).json({ message: 'Internal server error' });
@@ -2165,7 +2188,7 @@ app.put('/admin-update/:admin_id', (req, res) => {
   }
 
   const updateQuery = 'UPDATE collegeadministration SET email = ?, phone_number = ? WHERE admin_id = ?';
-  db.query(updateQuery, [email, phone_number, adminId], (err, result) => {
+  dbQuery(updateQuery, [email, phone_number, adminId], (err, result) => {
     if (err) {
       console.error('Error updating admin:', err);
       return res.status(500).json({ message: 'Internal server error' });
