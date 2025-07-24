@@ -3,8 +3,8 @@ import '../styles/Contact.css';
 import { FaPhone, FaEnvelope, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import Navbar from '../Navbar';
+import Footer from '../Footer';
 
 // Initialize EmailJS with your public key
 emailjs.init("bTyrXO1tKE3gpruGw"); // Replace with your actual public key from EmailJS dashboard
