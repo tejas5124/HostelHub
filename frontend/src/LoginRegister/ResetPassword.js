@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import api from '../api'; // ✅ Import centralized Axios instance
+import api from '../api';
 import '../styles/ResetPassword.css';
 
 function ResetPassword() {
@@ -13,7 +13,7 @@ function ResetPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (newPassword !== confirmPassword) {
       Swal.fire({
         icon: 'error',
@@ -34,31 +34,64 @@ function ResetPassword() {
       return;
     }
 
-    setLoading(true);
+    // Check if token exists
+    if (!token) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Reset Link',
+        text: 'This reset link is invalid or has expired.',
+      });
+      return;
+    }
 
+    setLoading(true);
+    
     try {
       const endpoint = userType === 'student'
         ? '/reset-password-student'
         : '/reset-password-owner';
-
-      // const response = await api.post(endpoint, { token, newPassword });
-      const response = await api.post(endpoint, {token,newPassword,confirmPassword});
-
+      
+      console.log('Sending request to:', endpoint);
+      console.log('With data:', { token, newPassword }); // Don't log in production
+      
+      // Try with just token and newPassword first
+      const response = await api.post(endpoint, { 
+        token, 
+        newPassword 
+      });
+      
+      console.log('Success response:', response.data);
+      
       Swal.fire({
         icon: 'success',
         title: 'Password Reset Successful!',
         text: 'Your password has been reset. Please login with your new password.',
       });
-
+      
       navigate(userType === 'student' ? '/student-login' : '/owner-login');
+      
     } catch (error) {
       console.error('Reset Error:', error);
+      console.error('Error Response:', error?.response?.data);
+      console.error('Error Status:', error?.response?.status);
+      console.error('Request Config:', error?.config);
+      
+      let errorMessage = 'Something went wrong. Please try again.';
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.response?.status === 400) {
+        errorMessage = 'Invalid request. Please check your reset link.';
+      } else if (error?.response?.status === 404) {
+        errorMessage = 'Reset link not found or has expired.';
+      }
+      
       Swal.fire({
         icon: 'error',
         title: 'Reset Failed',
-        text:
-          error?.response?.data?.message ||
-          'Something went wrong. Please try again.',
+        text: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -70,7 +103,6 @@ function ResetPassword() {
       <div className="reset-password-card">
         <h2>Reset Password</h2>
         <p>Please enter your new password below.</p>
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -81,7 +113,6 @@ function ResetPassword() {
               required
             />
           </div>
-
           <div className="form-group">
             <input
               type="password"
@@ -91,12 +122,10 @@ function ResetPassword() {
               required
             />
           </div>
-
           <button type="submit" className="submit-button" disabled={loading}>
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
-
         <div className="back-to-login">
           <button onClick={() => navigate(userType === 'student' ? '/student-login' : '/owner-login')}>
             Back to Login
