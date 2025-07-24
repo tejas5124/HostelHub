@@ -1775,84 +1775,7 @@ app.put('/update-owner/:owner_id', (req, res) => {
     });
 });
 
-// Route to handle forgot password request for students
-app.post('/forgot-password-student', async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
-  }
-
-  try {
-    // Check if email exists
-    const query = 'SELECT * FROM student WHERE email = ?';
-    db.query(query, [email], async (err, results) => {
-      if (err) {
-        console.error('Error querying database:', err);
-        return res.status(500).json({ message: 'Internal Server Error' });
-      }
-
-      if (results.length === 0) {
-        return res.status(404).json({ message: 'Email not found' });
-      }
-
-      const userName = results[0].name || '';
-
-      // Generate reset token
-      const resetToken = crypto.randomBytes(32).toString('hex');
-      const resetTokenExpiry = new Date(Date.now() + 3600000); // Token valid for 1 hour
-
-      // Store reset token in database
-      const updateQuery = 'UPDATE student SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
-      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err) => {
-        if (err) {
-          console.error('Error updating reset token:', err);
-          return res.status(500).json({ message: 'Internal Server Error' });
-        }
-
-        // Send reset email
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password-student/${resetToken}`;
-        const mailOptions = {
-          from: 'balajimore9193@gmail.com',
-          to: email,
-          subject: 'HostelHub Password Reset Request',
-          html: `
-            <div style="font-family: Arial, sans-serif; color: #222;">
-              <h2 style="color: #0056b3;">HostelHub Password Reset</h2>
-              <p>Hi${userName ? ' ' + userName : ''},</p>
-              <p>We received a request to reset your password for your <b>HostelHub</b> account.</p>
-              <p>
-                <a href="${resetUrl}" style="background: #0056b3; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-                  Reset Password
-                </a>
-              </p>
-              <p>If you did not request this, you can safely ignore this email.</p>
-              <p>This link will expire in 1 hour.</p>
-              <br>
-              <p>Thanks,<br>The HostelHub Team</p>
-              <hr>
-              <small>
-                This email was sent to you because you requested a password reset on HostelHub.<br>
-                If you have any questions, contact us at help.hostelhub@gmail.com
-              </small>
-            </div>
-          `
-        };
-
-        try {
-          await transporter.sendMail(mailOptions);
-          res.status(200).json({ message: 'Password reset email sent' });
-        } catch (error) {
-          console.error('Error sending email:', error);
-          res.status(500).json({ message: 'Error sending reset email' });
-        }
-      });
-    });
-  } catch (error) {
-    console.error('Error in forgot password:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
+// Updated server routes with better debugging and error handling
 
 // Route to handle forgot password request for owners
 app.post('/forgot-password-owner', async (req, res) => {
@@ -1881,18 +1804,25 @@ app.post('/forgot-password-owner', async (req, res) => {
       const resetToken = crypto.randomBytes(32).toString('hex');
       const resetTokenExpiry = new Date(Date.now() + 3600000); // Token valid for 1 hour
 
+      console.log('🔑 Generated reset token:', resetToken);
+      console.log('⏰ Token expiry:', resetTokenExpiry);
+
       // Store reset token in database
       const updateQuery = 'UPDATE hostelowner SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
-      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err) => {
+      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err, result) => {
         if (err) {
           console.error('Error updating reset token:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
         }
 
+        console.log('✅ Token stored in database. Affected rows:', result.affectedRows);
+
         // Send reset email
-         const resetUrl = `${process.env.FRONTEND_URL}/reset-password-owner/${resetToken}`;
+        const resetUrl = `https://hostelhub.balajimore.info/reset-password-owner/${resetToken}`;
+        console.log('📧 Reset URL:', resetUrl);
+        
         const mailOptions = {
-          from: 'balajimore9193@gmail.com',
+          from: 'help.hostelhub@gmail.com',
           to: email,
           subject: 'HostelHub Password Reset Request',
           html: `
@@ -1912,7 +1842,7 @@ app.post('/forgot-password-owner', async (req, res) => {
               <hr>
               <small>
                 This email was sent to you because you requested a password reset on HostelHub.<br>
-                If you have any questions, contact us at support@hostelhub.com
+                If you have any questions, contact us at help.hostelhub@gmail.com
               </small>
             </div>
           `
@@ -1920,6 +1850,7 @@ app.post('/forgot-password-owner', async (req, res) => {
 
         try {
           await transporter.sendMail(mailOptions);
+          console.log('✅ Reset email sent successfully');
           res.status(200).json({ message: 'Password reset email sent' });
         } catch (error) {
           console.error('Error sending email:', error);
@@ -1933,84 +1864,249 @@ app.post('/forgot-password-owner', async (req, res) => {
   }
 });
 
-// // Route to handle password reset for students
-app.post('/reset-password-student', async (req, res) => {
-  const { token, newPassword } = req.body;
+// Route to handle forgot password request for students
+app.post('/forgot-password-student', async (req, res) => {
+  const { email } = req.body;
 
-  if (!token || !newPassword) {
-    return res.status(400).json({ message: 'Token and new password are required' });
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
   }
 
   try {
-    // Find user with valid reset token
-    const query = 'SELECT * FROM student WHERE reset_token = ? AND reset_token_expiry > NOW()';
-    db.query(query, [token], async (err, results) => {
+    // Check if email exists
+    const query = 'SELECT * FROM student WHERE email = ?';
+    db.query(query, [email], async (err, results) => {
       if (err) {
         console.error('Error querying database:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
       }
 
       if (results.length === 0) {
-        return res.status(400).json({ message: 'Invalid or expired reset token' });
+        return res.status(404).json({ message: 'Email not found' });
       }
 
-      // Hash new password
-      const hashedPassword = await hashPassword(newPassword);
+      const userName = results[0].name || '';
 
-      // Update password and clear reset token
-      const updateQuery = 'UPDATE student SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
-      db.query(updateQuery, [hashedPassword, token], (err) => {
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = new Date(Date.now() + 3600000); // Token valid for 1 hour
+
+      console.log('🔑 Generated reset token:', resetToken);
+      console.log('⏰ Token expiry:', resetTokenExpiry);
+
+      // Store reset token in database
+      const updateQuery = 'UPDATE student SET reset_token = ?, reset_token_expiry = ? WHERE email = ?';
+      db.query(updateQuery, [resetToken, resetTokenExpiry, email], async (err, result) => {
         if (err) {
-          console.error('Error updating password:', err);
+          console.error('Error updating reset token:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
         }
 
-        res.status(200).json({ message: 'Password reset successful' });
+        console.log('✅ Token stored in database. Affected rows:', result.affectedRows);
+
+        // Send reset email
+        const resetUrl = `https://hostelhub.balajimore.info/reset-password-student/${resetToken}`;
+        console.log('📧 Reset URL:', resetUrl);
+        
+        const mailOptions = {
+          from: 'help.hostelhub@gmail.com',
+          to: email,
+          subject: 'HostelHub Password Reset Request',
+          html: `
+            <div style="font-family: Arial, sans-serif; color: #222;">
+              <h2 style="color: #0056b3;">HostelHub Password Reset</h2>
+              <p>Hi${userName ? ' ' + userName : ''},</p>
+              <p>We received a request to reset your password for your <b>HostelHub</b> account.</p>
+              <p>
+                <a href="${resetUrl}" style="background: #0056b3; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                  Reset Password
+                </a>
+              </p>
+              <p>If you did not request this, you can safely ignore this email.</p>
+              <p>This link will expire in 1 hour.</p>
+              <br>
+              <p>Thanks,<br>The HostelHub Team</p>
+              <hr>
+              <small>
+                This email was sent to you because you requested a password reset on HostelHub.<br>
+                If you have any questions, contact us at help.hostelhub@gmail.com
+              </small>
+            </div>
+          `
+        };
+
+        try {
+          await transporter.sendMail(mailOptions);
+          console.log('✅ Reset email sent successfully');
+          res.status(200).json({ message: 'Password reset email sent' });
+        } catch (error) {
+          console.error('Error sending email:', error);
+          res.status(500).json({ message: 'Error sending reset email' });
+        }
       });
     });
   } catch (error) {
-    console.error('Error in password reset:', error);
+    console.error('Error in forgot password:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-// Route to handle password reset for owners
+// Route to handle password reset for owners with better debugging
 app.post('/reset-password-owner', async (req, res) => {
   const { token, newPassword } = req.body;
 
+  console.log('🔍 Password reset request received:');
+  console.log('  - Token:', token);
+  console.log('  - Token length:', token ? token.length : 0);
+  console.log('  - Has password:', !!newPassword);
+
   if (!token || !newPassword) {
+    console.log('❌ Missing token or password');
     return res.status(400).json({ message: 'Token and new password are required' });
   }
 
   try {
-    // Find user with valid reset token
-    const query = 'SELECT * FROM hostelowner WHERE reset_token = ? AND reset_token_expiry > NOW()';
-    db.query(query, [token], async (err, results) => {
+    // First, let's check if the token exists at all
+    const checkTokenQuery = 'SELECT owner_id, email, reset_token, reset_token_expiry FROM hostelowner WHERE reset_token = ?';
+    db.query(checkTokenQuery, [token], async (err, tokenResults) => {
       if (err) {
-        console.error('Error querying database:', err);
+        console.error('❌ Error checking token:', err);
         return res.status(500).json({ message: 'Internal Server Error' });
       }
 
-      if (results.length === 0) {
-        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      console.log('🔍 Token check results:', tokenResults.length);
+      if (tokenResults.length > 0) {
+        const user = tokenResults[0];
+        console.log('  - Found user:', user.email);
+        console.log('  - Token expiry:', user.reset_token_expiry);
+        console.log('  - Current time:', new Date());
+        console.log('  - Is expired:', new Date() > new Date(user.reset_token_expiry));
       }
 
-      // Hash new password
-      const hashedPassword = await hashPassword(newPassword);
-
-      // Update password and clear reset token
-      const updateQuery = 'UPDATE hostelowner SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
-      db.query(updateQuery, [hashedPassword, token], (err) => {
+      // Now check with expiry validation
+      const query = 'SELECT * FROM hostelowner WHERE reset_token = ? AND reset_token_expiry > NOW()';
+      db.query(query, [token], async (err, results) => {
         if (err) {
-          console.error('Error updating password:', err);
+          console.error('❌ Error querying database:', err);
           return res.status(500).json({ message: 'Internal Server Error' });
         }
 
-        res.status(200).json({ message: 'Password reset successful' });
+        console.log('🔍 Valid token results:', results.length);
+
+        if (results.length === 0) {
+          console.log('❌ Invalid or expired reset token');
+          
+          // Check if token exists but is expired
+          if (tokenResults.length > 0) {
+            console.log('⚠️ Token exists but is expired');
+            return res.status(400).json({ message: 'Reset token has expired. Please request a new password reset.' });
+          } else {
+            console.log('⚠️ Token not found in database');
+            return res.status(400).json({ message: 'Invalid reset token. Please request a new password reset.' });
+          }
+        }
+
+        console.log('✅ Valid token found, proceeding with password reset');
+
+        // Hash new password
+        const hashedPassword = await hashPassword(newPassword);
+        console.log('✅ Password hashed successfully');
+
+        // Update password and clear reset token
+        const updateQuery = 'UPDATE hostelowner SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
+        db.query(updateQuery, [hashedPassword, token], (err, result) => {
+          if (err) {
+            console.error('❌ Error updating password:', err);
+            return res.status(500).json({ message: 'Internal Server Error' });
+          }
+
+          console.log('✅ Password updated successfully. Affected rows:', result.affectedRows);
+          res.status(200).json({ message: 'Password reset successful' });
+        });
       });
     });
   } catch (error) {
-    console.error('Error in password reset:', error);
+    console.error('❌ Error in password reset:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Route to handle password reset for students with better debugging
+app.post('/reset-password-student', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  console.log('🔍 Password reset request received:');
+  console.log('  - Token:', token);
+  console.log('  - Token length:', token ? token.length : 0);
+  console.log('  - Has password:', !!newPassword);
+
+  if (!token || !newPassword) {
+    console.log('❌ Missing token or password');
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    // First, let's check if the token exists at all
+    const checkTokenQuery = 'SELECT student_id, email, reset_token, reset_token_expiry FROM student WHERE reset_token = ?';
+    db.query(checkTokenQuery, [token], async (err, tokenResults) => {
+      if (err) {
+        console.error('❌ Error checking token:', err);
+        return res.status(500).json({ message: 'Internal Server Error' });
+      }
+
+      console.log('🔍 Token check results:', tokenResults.length);
+      if (tokenResults.length > 0) {
+        const user = tokenResults[0];
+        console.log('  - Found user:', user.email);
+        console.log('  - Token expiry:', user.reset_token_expiry);
+        console.log('  - Current time:', new Date());
+        console.log('  - Is expired:', new Date() > new Date(user.reset_token_expiry));
+      }
+
+      // Now check with expiry validation
+      const query = 'SELECT * FROM student WHERE reset_token = ? AND reset_token_expiry > NOW()';
+      db.query(query, [token], async (err, results) => {
+        if (err) {
+          console.error('❌ Error querying database:', err);
+          return res.status(500).json({ message: 'Internal Server Error' });
+        }
+
+        console.log('🔍 Valid token results:', results.length);
+
+        if (results.length === 0) {
+          console.log('❌ Invalid or expired reset token');
+          
+          // Check if token exists but is expired
+          if (tokenResults.length > 0) {
+            console.log('⚠️ Token exists but is expired');
+            return res.status(400).json({ message: 'Reset token has expired. Please request a new password reset.' });
+          } else {
+            console.log('⚠️ Token not found in database');
+            return res.status(400).json({ message: 'Invalid reset token. Please request a new password reset.' });
+          }
+        }
+
+        console.log('✅ Valid token found, proceeding with password reset');
+
+        // Hash new password
+        const hashedPassword = await hashPassword(newPassword);
+        console.log('✅ Password hashed successfully');
+
+        // Update password and clear reset token
+        const updateQuery = 'UPDATE student SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?';
+        db.query(updateQuery, [hashedPassword, token], (err, result) => {
+          if (err) {
+            console.error('❌ Error updating password:', err);
+            return res.status(500).json({ message: 'Internal Server Error' });
+          }
+
+          console.log('✅ Password updated successfully. Affected rows:', result.affectedRows);
+          res.status(200).json({ message: 'Password reset successful' });
+        });
+      });
+    });
+  } catch (error) {
+    console.error('❌ Error in password reset:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
