@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import api from '../api';
 import '../styles/ResetPassword.css';
@@ -8,11 +8,38 @@ function ResetPassword() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState('');
   const navigate = useNavigate();
-  const { token, userType } = useParams();
+  const { token } = useParams();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Extract userType from the current path
+    const path = location.pathname;
+    console.log('Current path:', path);
+    
+    if (path.includes('/reset-password-student/')) {
+      setUserType('student');
+    } else if (path.includes('/reset-password-owner/')) {
+      setUserType('owner');
+    } else {
+      // Fallback - try to get from URL params if the route is still /reset-password/:userType/:token
+      const { userType: paramUserType } = useParams();
+      setUserType(paramUserType);
+    }
+  }, [location.pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!userType) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Reset Link',
+        text: 'Unable to determine user type from the reset link.',
+      });
+      return;
+    }
     
     if (newPassword !== confirmPassword) {
       Swal.fire({
@@ -34,7 +61,6 @@ function ResetPassword() {
       return;
     }
 
-    // Check if token exists
     if (!token) {
       Swal.fire({
         icon: 'error',
@@ -51,10 +77,10 @@ function ResetPassword() {
         ? '/reset-password-student'
         : '/reset-password-owner';
       
+      console.log('User Type:', userType);
       console.log('Sending request to:', endpoint);
-      console.log('With data:', { token, newPassword }); // Don't log in production
+      console.log('With data:', { token, newPassword });
       
-      // Try with just token and newPassword first
       const response = await api.post(endpoint, { 
         token, 
         newPassword 
@@ -73,19 +99,13 @@ function ResetPassword() {
     } catch (error) {
       console.error('Reset Error:', error);
       console.error('Error Response:', error?.response?.data);
-      console.error('Error Status:', error?.response?.status);
-      console.error('Request Config:', error?.config);
       
       let errorMessage = 'Something went wrong. Please try again.';
       
       if (error?.response?.data?.message) {
         errorMessage = error.response.data.message;
-      } else if (error?.response?.data?.error) {
-        errorMessage = error.response.data.error;
       } else if (error?.response?.status === 400) {
-        errorMessage = 'Invalid request. Please check your reset link.';
-      } else if (error?.response?.status === 404) {
-        errorMessage = 'Reset link not found or has expired.';
+        errorMessage = 'Invalid or expired reset token. Please request a new password reset.';
       }
       
       Swal.fire({
@@ -103,6 +123,9 @@ function ResetPassword() {
       <div className="reset-password-card">
         <h2>Reset Password</h2>
         <p>Please enter your new password below.</p>
+        {userType && (
+          <p><small>Resetting password for: {userType}</small></p>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -122,7 +145,7 @@ function ResetPassword() {
               required
             />
           </div>
-          <button type="submit" className="submit-button" disabled={loading}>
+          <button type="submit" className="submit-button" disabled={loading || !userType}>
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
