@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../../styles/student-dashboard.css';
@@ -13,27 +13,49 @@ const StudentDashboard = () => {
     const [sortOption, setSortOption] = useState('');
     const [selectedHostel, setSelectedHostel] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState({ totalBookings: 0, activeBookings: 0 });
     const [showBookingModal, setShowBookingModal] = useState(false);
-    const [bookingDetails, setBookingDetails] = useState({ check_in_date: '', check_out_date: '', total_amount: 0 });
+    const [bookingDetails, setBookingDetails] = useState({ 
+        check_in_date: '', 
+        check_out_date: '', 
+        total_amount: 0 
+    });
+    const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
     const navigate = useNavigate();
+
+    // Debounced search function
+    const [searchTimeout, setSearchTimeout] = useState(null);
 
     useEffect(() => {
         const checkSession = async () => {
             try {
-                const response = await fetch("/student-session", { method: "GET", credentials: "include" });
+                const response = await fetch("/student-session", { 
+                    method: "GET", 
+                    credentials: "include" 
+                });
                 if (response.ok) {
                     setIsLoggedIn(true);
-                    fetchStudentStats();
-                    fetchHostels();
+                    await Promise.all([fetchStudentStats(), fetchHostels()]);
                 } else {
                     setIsLoggedIn(false);
-                    Swal.fire({ icon: 'warning', title: 'Session Expired', text: 'Please log in again to continue.' })
-                        .then(() => navigate('/student-login'));
+                    Swal.fire({ 
+                        icon: 'warning', 
+                        title: 'Session Expired', 
+                        text: 'Please log in again to continue.' 
+                    }).then(() => navigate('/student-login'));
                 }
             } catch (error) {
+                console.error('Session check error:', error);
                 setIsLoggedIn(false);
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Connection Error', 
+                    text: 'Unable to verify session. Please try again.' 
+                });
+            } finally {
+                setIsLoading(false);
             }
         };
         checkSession();
@@ -41,11 +63,20 @@ const StudentDashboard = () => {
 
     const fetchStudentStats = async () => {
         const studentId = localStorage.getItem('student_id');
-        if (!studentId) return;
+        if (!studentId) {
+            console.warn('No student ID found in localStorage');
+            return;
+        }
         try {
             const response = await api.get(`/student-stats/${studentId}`);
-            setStats({ totalBookings: response.data.totalBookings || 0, activeBookings: response.data.activeBookings || 0 });
-        } catch (error) {}
+            setStats({ 
+                totalBookings: response.data.totalBookings || 0, 
+                activeBookings: response.data.activeBookings || 0 
+            });
+        } catch (error) {
+            console.error('Error fetching student stats:', error);
+            // Don't show error to user for stats failure - it's not critical
+        }
     };
 
     const fetchHostels = async () => {
@@ -53,172 +84,386 @@ const StudentDashboard = () => {
             const response = await api.get('/stu_hostels');
             const processed = response.data.map(h => ({
                 ...h,
-                facilities: Array.isArray(h.facilities) ? h.facilities : typeof h.facilities === 'string' ? JSON.parse(h.facilities || '[]') : []
+                facilities: processFacilities(h.facilities)
             }));
             setHostels(processed);
             setOriginalHostels(processed);
         } catch (error) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to fetch hostels.' });
+            console.error('Error fetching hostels:', error);
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Error', 
+                text: 'Failed to fetch hostels. Please refresh the page.' 
+            });
         }
     };
 
-    useEffect(() => {
-        applyFilters();
-    }, [searchTerm, selectedFacilities, sortOption]);
-
-    const applyFilters = () => {
-        let filtered = [...originalHostels];
-        if (searchTerm) filtered = filtered.filter(h => h.name.toLowerCase().includes(searchTerm.toLowerCase()));
-        if (selectedFacilities.length)
-            filtered = filtered.filter(h => selectedFacilities.every(fac => h.facilities.includes(fac)));
-        if (sortOption === 'price_asc') filtered.sort((a, b) => a.rent - b.rent);
-        else if (sortOption === 'price_desc') filtered.sort((a, b) => b.rent - a.rent);
-        setHostels(filtered);
+    // Helper function to process facilities data
+    const processFacilities = (facilities) => {
+        if (Array.isArray(facilities)) {
+            return facilities;
+        }
+        if (typeof facilities === 'string') {
+            try {
+                return JSON.parse(facilities);
+            } catch (e) {
+                // If JSON parsing fails, treat as comma-separated string
+                return facilities.split(',').map(f => f.trim()).filter(f => f);
+            }
+        }
+        return [];
     };
 
+    // Memoized filter function with debouncing for search
+    const applyFilters = useCallback(() => {
+        let filtered = [...originalHostels];
+        
+        // Apply search filter
+        if (searchTerm.trim()) {
+            const searchLower = searchTerm.toLowerCase().trim();
+            filtered = filtered.filter(h => 
+                h.name.toLowerCase().includes(searchLower) ||
+                h.address.toLowerCase().includes(searchLower)
+            );
+        }
+        
+        // Apply facility filters
+        if (selectedFacilities.length > 0) {
+            filtered = filtered.filter(h => 
+                selectedFacilities.every(fac => 
+                    h.facilities.some(hFac => 
+                        hFac.toLowerCase().includes(fac.toLowerCase())
+                    )
+                )
+            );
+        }
+        
+        // Apply sorting
+        if (sortOption === 'price_asc') {
+            filtered.sort((a, b) => (a.rent || 0) - (b.rent || 0));
+        } else if (sortOption === 'price_desc') {
+            filtered.sort((a, b) => (b.rent || 0) - (a.rent || 0));
+        } else if (sortOption === 'availability') {
+            filtered.sort((a, b) => (b.available_rooms || 0) - (a.available_rooms || 0));
+        } else if (sortOption === 'name') {
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+        }
+        
+        setHostels(filtered);
+    }, [originalHostels, searchTerm, selectedFacilities, sortOption]);
+
+    // Apply filters with debouncing for search
+    useEffect(() => {
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        
+        const timeout = setTimeout(() => {
+            applyFilters();
+        }, searchTerm ? 300 : 0); // Debounce search by 300ms
+        
+        setSearchTimeout(timeout);
+        
+        return () => {
+            if (timeout) clearTimeout(timeout);
+        };
+    }, [applyFilters, searchTerm]);
+
+    // Apply filters immediately for non-search changes
+    useEffect(() => {
+        if (!searchTerm) {
+            applyFilters();
+        }
+    }, [selectedFacilities, sortOption, applyFilters, searchTerm]);
+
     const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-};
+        setSearchTerm(e.target.value);
+    };
 
-const handleFacilityChange = (facility) => {
-    setSelectedFacilities((prev) =>
-        prev.includes(facility)
-            ? prev.filter((f) => f !== facility)
-            : [...prev, facility]
-    );
-};
+    const handleFacilityChange = (facility) => {
+        setSelectedFacilities((prev) =>
+            prev.includes(facility)
+                ? prev.filter((f) => f !== facility)
+                : [...prev, facility]
+        );
+    };
 
-const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-};
+    const handleSortChange = (e) => {
+        setSortOption(e.target.value);
+    };
 
-const handleBookHostel = (hostelId) => {
-    const hostel = hostels.find(h => h.hostel_id === hostelId);
-    setSelectedHostel(hostel);
-};
+    const handleBookHostel = (hostelId) => {
+        const hostel = hostels.find(h => h.hostel_id === hostelId);
+        if (!hostel) {
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Error', 
+                text: 'Hostel not found. Please try again.' 
+            });
+            return;
+        }
+        if (hostel.available_rooms <= 0) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'No Rooms Available', 
+                text: 'This hostel is currently full. Please check other options.' 
+            });
+            return;
+        }
+        setSelectedHostel(hostel);
+    };
 
-const handleBack = () => {
-    setSelectedHostel(null);
-};
+    const handleBack = () => {
+        setSelectedHostel(null);
+        setShowBookingModal(false);
+        // Reset booking details when going back
+        setBookingDetails({ check_in_date: '', check_out_date: '', total_amount: 0 });
+    };
 
+    const validateBookingDates = () => {
+        const { check_in_date, check_out_date } = bookingDetails;
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (!check_in_date) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Invalid Date', 
+                text: 'Please select a check-in date.' 
+            });
+            return false;
+        }
+        
+        if (check_in_date < today) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Invalid Date', 
+                text: 'Check-in date cannot be in the past.' 
+            });
+            return false;
+        }
+        
+        if (check_out_date && check_out_date <= check_in_date) {
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Invalid Date', 
+                text: 'Check-out date must be after check-in date.' 
+            });
+            return false;
+        }
+        
+        return true;
+    };
 
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!validateBookingDates()) {
+            return;
+        }
+        
         const studentId = localStorage.getItem('student_id');
+        if (!studentId) {
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Authentication Error', 
+                text: 'Please log in again to continue.' 
+            });
+            navigate('/student-login');
+            return;
+        }
+        
+        setIsSubmittingBooking(true);
+        
         try {
-            const response = await api.post('/add-booking', {
+            const bookingData = {
                 hostel_id: selectedHostel.hostel_id,
-                student_id: studentId,
+                student_id: parseInt(studentId),
                 check_in_date: bookingDetails.check_in_date,
                 check_out_date: bookingDetails.check_out_date || null,
                 total_amount: bookingDetails.total_amount,
                 payment_status: 'pending'
+            };
+            
+            const response = await api.post('/add-booking', bookingData);
+            
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'Success!', 
+                text: 'Booking request submitted successfully. You will be notified once it\'s approved.' 
             });
-            Swal.fire({ icon: 'success', title: 'Success!', text: 'Booking request submitted.' });
+            
             setShowBookingModal(false);
             setSelectedHostel(null);
+            setBookingDetails({ check_in_date: '', check_out_date: '', total_amount: 0 });
+            
+            // Refresh stats after successful booking
+            fetchStudentStats();
+            
         } catch (error) {
-            Swal.fire({ icon: 'error', title: 'Error', text: error.response?.data?.message || 'Booking failed.' });
+            console.error('Booking error:', error);
+            const errorMessage = error.response?.data?.message || 
+                               error.response?.data?.error || 
+                               'Booking failed. Please try again.';
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Booking Failed', 
+                text: errorMessage 
+            });
+        } finally {
+            setIsSubmittingBooking(false);
         }
     };
 
-    const calculateTotalAmount = (checkIn) => selectedHostel?.rent || 0;
+    const calculateTotalAmount = (checkIn, checkOut) => {
+        if (!selectedHostel || !checkIn) return 0;
+        
+        const rent = selectedHostel.rent || 0;
+        
+        if (!checkOut) {
+            // For long-term stay, return monthly rent
+            return rent;
+        }
+        
+        // Calculate days and proportional amount
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const diffTime = Math.abs(checkOutDate - checkInDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const dailyRate = rent / 30; // Assuming 30 days per month
+        
+        return Math.round(dailyRate * diffDays);
+    };
 
-    if (!isLoggedIn) return <div className="login-message"><div className="loading-spinner"></div><p>Please log in to access the dashboard.</p></div>;
+    const clearAllFilters = () => {
+        setSearchTerm('');
+        setSelectedFacilities([]);
+        setSortOption('');
+    };
+
+    // Show loading state
+    if (isLoading) {
+        return (
+            <div className="dashboard">
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p>Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show login message if not logged in
+    if (!isLoggedIn) {
+        return (
+            <div className="login-message">
+                <div className="loading-spinner"></div>
+                <p>Please log in to access the dashboard.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="dashboard">
             <div className="dashboard-header">
                 <DashboardHeader role="student" />
-                <div className="logo" onClick={() => navigate('/student-dashboard')}><h1>HostelHub</h1></div>
+                <div className="logo" onClick={() => navigate('/student-dashboard')}>
+                    <h1>HostelHub</h1>
+                </div>
                 <div className="nav-menu">
-                    <button className="nav-button" onClick={() => setSelectedHostel(null)}>🏠 Browse Hostels</button>
-                    <button className="nav-button" onClick={() => navigate('/my-bookings')}>📚 My Bookings</button>
-                    <button className="nav-button" onClick={() => navigate('/profile')}>👤 Profile</button>
+                    <button 
+                        className={`nav-button ${!selectedHostel ? 'active' : ''}`}
+                        onClick={() => setSelectedHostel(null)}
+                    >
+                        🏠 Browse Hostels
+                    </button>
+                    <button 
+                        className="nav-button" 
+                        onClick={() => navigate('/my-bookings')}
+                    >
+                        📚 My Bookings
+                    </button>
+                    <button 
+                        className="nav-button" 
+                        onClick={() => navigate('/profile')}
+                    >
+                        👤 Profile
+                    </button>
                 </div>
             </div>
+            
             <div className="main-content">
                 <div className="stats-container">
-                    <div className="stat-card"><h3>Total Bookings</h3><p>{stats.totalBookings}</p></div>
-                    <div className="stat-card"><h3>Active Bookings</h3><p>{stats.activeBookings}</p></div>
+                    <div className="stat-card">
+                        <h3>Total Bookings</h3>
+                        <p>{stats.totalBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                        <h3>Active Bookings</h3>
+                        <p>{stats.activeBookings}</p>
+                    </div>
+                    <div className="stat-card">
+                        <h3>Available Hostels</h3>
+                        <p>{hostels.filter(h => h.available_rooms > 0).length}</p>
+                    </div>
                 </div>
-            {!selectedHostel ? (
+
+                {!selectedHostel ? (
                     <>
-                        <div className="search-bar">
-                            <input
-                                type="text"
-                                placeholder="Search hostel by name..."
-                                value={searchTerm}
-                                onChange={handleSearch}
-                            />
+                        <div className="search-and-results">
+                            <div className="search-bar">
+                                <input
+                                    type="text"
+                                    placeholder="Search hostel by name or location..."
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                />
+                                {(searchTerm || selectedFacilities.length > 0 || sortOption) && (
+                                    <button 
+                                        className="clear-filters-btn"
+                                        onClick={clearAllFilters}
+                                        title="Clear all filters"
+                                    >
+                                        ✕ Clear
+                                    </button>
+                                )}
+                            </div>
+                            
+                            <div className="results-info">
+                                <span>Showing {hostels.length} of {originalHostels.length} hostels</span>
+                            </div>
                         </div>
 
                         <div className="content">
                             <aside className="filters">
                                 <h2>Filters</h2>
-                                <div className="checkbox-group">
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            value="wifi"
-                                            checked={selectedFacilities.includes('wifi')}
-                                            onChange={() => handleFacilityChange('wifi')}
-                                        />
-                                        Wi-Fi
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            value="gym"
-                                            checked={selectedFacilities.includes('gym')}
-                                            onChange={() => handleFacilityChange('gym')}
-                                        />
-                                        Gym
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            value="laundry"
-                                            checked={selectedFacilities.includes('laundry')}
-                                            onChange={() => handleFacilityChange('laundry')}
-                                        />
-                                        Laundry
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            value="parking"
-                                            checked={selectedFacilities.includes('parking')}
-                                            onChange={() => handleFacilityChange('parking')}
-                                        />
-                                        Parking
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            value="24_hr_water"
-                                            checked={selectedFacilities.includes('24_hr_water')}
-                                            onChange={() => handleFacilityChange('24_hr_water')}
-                                        />
-                                        24-Hour Water
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            value="hot_water"
-                                            checked={selectedFacilities.includes('hot_water')}
-                                            onChange={() => handleFacilityChange('hot_water')}
-                                        />
-                                        Hot Water
-                                    </label>
+                                
+                                <div className="filter-section">
+                                    <h3>Facilities</h3>
+                                    <div className="checkbox-group">
+                                        {['wifi', 'gym', 'laundry', 'parking', '24_hr_water', 'hot_water', 'mess', 'security'].map(facility => (
+                                            <label key={facility}>
+                                                <input
+                                                    type="checkbox"
+                                                    value={facility}
+                                                    checked={selectedFacilities.includes(facility)}
+                                                    onChange={() => handleFacilityChange(facility)}
+                                                />
+                                                {facility.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                            </label>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                <h3>Sort By</h3>
-                                <select value={sortOption} onChange={handleSortChange}>
-                                    <option value="">Select Sort Option</option>
-                                    <option value="price_asc">Price: Low to High</option>
-                                    <option value="price_desc">Price: High to Low</option>
-                                </select>
+                                <div className="filter-section">
+                                    <h3>Sort By</h3>
+                                    <select value={sortOption} onChange={handleSortChange}>
+                                        <option value="">Default</option>
+                                        <option value="price_asc">Price: Low to High</option>
+                                        <option value="price_desc">Price: High to Low</option>
+                                        <option value="availability">Most Available Rooms</option>
+                                        <option value="name">Name (A-Z)</option>
+                                    </select>
+                                </div>
                             </aside>
 
                             <main className="hostels-grid">
@@ -252,17 +497,33 @@ const handleBack = () => {
                                                     </div>
                                                     <div className="detail-item">
                                                         <span className="detail-icon">💰</span>
-                                                        <span className="detail-text">₹{hostel.rent || 'N/A'}</span>
+                                                        <span className="detail-text">₹{hostel.rent || 'N/A'}/month</span>
                                                     </div>
                                                     <div className="detail-item">
                                                         <span className="detail-icon">🛏️</span>
-                                                        <span className="detail-text">Total Rooms: {hostel.total_rooms || 'N/A'}</span>
+                                                        <span className="detail-text">Total: {hostel.total_rooms || 'N/A'}</span>
                                                     </div>
                                                     <div className="detail-item">
                                                         <span className="detail-icon">🚪</span>
                                                         <span className="detail-text">Available: {hostel.available_rooms || 'N/A'}</span>
                                                     </div>
                                                 </div>
+                                                
+                                                {hostel.facilities.length > 0 && (
+                                                    <div className="quick-facilities">
+                                                        {hostel.facilities.slice(0, 3).map((facility, index) => (
+                                                            <span key={index} className="facility-tag">
+                                                                {facility}
+                                                            </span>
+                                                        ))}
+                                                        {hostel.facilities.length > 3 && (
+                                                            <span className="facility-tag more">
+                                                                +{hostel.facilities.length - 3} more
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                
                                                 <div className="button-group">
                                                     <button
                                                         className="view-details-btn"
@@ -277,14 +538,30 @@ const handleBack = () => {
                                     ))
                                 ) : (
                                     <div className="no-hostels">
-                                        <p>No hostels available matching your criteria</p>
+                                        <div className="no-hostels-content">
+                                            <h3>No hostels found</h3>
+                                            <p>
+                                                {searchTerm || selectedFacilities.length > 0 
+                                                    ? "Try adjusting your search criteria or filters."
+                                                    : "No hostels are currently available."
+                                                }
+                                            </p>
+                                            {(searchTerm || selectedFacilities.length > 0) && (
+                                                <button 
+                                                    className="clear-filters-btn"
+                                                    onClick={clearAllFilters}
+                                                >
+                                                    Clear All Filters
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </main>
                         </div>
                     </>
                 ) : (
-                    <div>
+                    <div className="hostel-detail-view">
                         <button className="back-btn" onClick={handleBack}>
                             <span className="button-icon">←</span>
                             Back to List
@@ -304,7 +581,13 @@ const handleBack = () => {
                                 />
                             </div>
                             <div className="hostel-detail-content enhanced-detail-content">
-                                <h2>{selectedHostel.name}</h2>
+                                <div className="hostel-header">
+                                    <h2>{selectedHostel.name}</h2>
+                                    <span className={`status-badge large ${selectedHostel.available_rooms > 0 ? 'available' : 'full'}`}>
+                                        {selectedHostel.available_rooms > 0 ? 'Available' : 'Full'}
+                                    </span>
+                                </div>
+                                
                                 <div className="hostel-detail-grid">
                                     <div className="detail-item">
                                         <span className="detail-icon">📍</span>
@@ -312,7 +595,7 @@ const handleBack = () => {
                                     </div>
                                     <div className="detail-item">
                                         <span className="detail-icon">💰</span>
-                                        <span className="detail-text">₹{selectedHostel.rent || 'N/A'}</span>
+                                        <span className="detail-text">₹{selectedHostel.rent || 'N/A'}/month</span>
                                     </div>
                                     <div className="detail-item">
                                         <span className="detail-icon">🛏️</span>
@@ -323,56 +606,58 @@ const handleBack = () => {
                                         <span className="detail-text">Available: {selectedHostel.available_rooms || 'N/A'}</span>
                                     </div>
                                 </div>
+                                
                                 {selectedHostel.description && (
                                     <div className="hostel-description enhanced-description">
                                         <h3>Description</h3>
                                         <p>{selectedHostel.description}</p>
                                     </div>
                                 )}
+                                
                                 {selectedHostel.facilities && selectedHostel.facilities.length > 0 && (
                                     <div className="hostel-facilities enhanced-facilities">
                                         <h3>Facilities</h3>
                                         <div className="facilities-grid">
-                                            {Array.isArray(selectedHostel.facilities) ? (
-                                                selectedHostel.facilities.map((facility, index) => (
-                                                    <span key={index} className="facility-badge">
-                                                        {facility}
-                                                    </span>
-                                                ))
-                                            ) : (
-                                                <span className="facility-badge">{selectedHostel.facilities}</span>
-                                            )}
+                                            {selectedHostel.facilities.map((facility, index) => (
+                                                <span key={index} className="facility-badge">
+                                                    {facility}
+                                                </span>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
+                                
                                 <button 
-                                    className="book-now-btn" 
+                                    className="book-now-btn"
                                     onClick={() => setShowBookingModal(true)}
+                                    disabled={selectedHostel.available_rooms <= 0}
                                 >
-                                    Book Now
+                                    {selectedHostel.available_rooms > 0 ? 'Book Now' : 'No Rooms Available'}
                                 </button>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Booking Modal */}
+                {/* Enhanced Booking Modal */}
                 {showBookingModal && (
-                    <div className="modal-overlay">
+                    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowBookingModal(false)}>
                         <div className="booking-modal">
                             <div className="modal-header">
                                 <h2>Book {selectedHostel?.name}</h2>
                                 <button 
                                     className="close-btn"
                                     onClick={() => setShowBookingModal(false)}
+                                    disabled={isSubmittingBooking}
                                 >
                                     ×
                                 </button>
                             </div>
                             <form onSubmit={handleBookingSubmit}>
                                 <div className="form-group">
-                                    <label>Check-in Date</label>
+                                    <label htmlFor="check_in_date">Check-in Date *</label>
                                     <input
+                                        id="check_in_date"
                                         type="date"
                                         required
                                         min={new Date().toISOString().split('T')[0]}
@@ -382,28 +667,34 @@ const handleBack = () => {
                                             setBookingDetails(prev => ({
                                                 ...prev,
                                                 check_in_date: newCheckIn,
-                                                total_amount: calculateTotalAmount(newCheckIn)
+                                                total_amount: calculateTotalAmount(newCheckIn, prev.check_out_date)
                                             }));
                                         }}
+                                        disabled={isSubmittingBooking}
                                     />
                                 </div>
+                                
                                 <div className="form-group">
-                                    <label>Check-out Date (Optional)</label>
+                                    <label htmlFor="check_out_date">Check-out Date (Optional)</label>
                                     <input
+                                        id="check_out_date"
                                         type="date"
                                         min={bookingDetails.check_in_date || new Date().toISOString().split('T')[0]}
                                         value={bookingDetails.check_out_date}
                                         onChange={(e) => {
                                             setBookingDetails(prev => ({
                                                 ...prev,
-                                                check_out_date: e.target.value
+                                                check_out_date: e.target.value,
+                                                total_amount: calculateTotalAmount(prev.check_in_date, e.target.value)
                                             }));
                                         }}
+                                        disabled={isSubmittingBooking}
                                     />
                                     <small className="form-text text-muted">
-                                        If not specified, booking will be considered as long-term stay
+                                        Leave empty for long-term stay (monthly billing)
                                     </small>
                                 </div>
+                                
                                 <div className="booking-summary">
                                     <h3>Booking Summary</h3>
                                     <div className="summary-item">
@@ -415,27 +706,32 @@ const handleBack = () => {
                                         <span>₹{selectedHostel?.rent}</span>
                                     </div>
                                     <div className="summary-item">
-                                        <span>Total Amount (First Month):</span>
+                                        <span>
+                                            {bookingDetails.check_out_date ? 'Total Amount:' : 'First Month:'}
+                                        </span>
                                         <span>₹{bookingDetails.total_amount}</span>
                                     </div>
                                     <div className="summary-item">
-                                        <span>Payment Schedule:</span>
-                                        <span>Monthly</span>
+                                        <span>Payment Status:</span>
+                                        <span>Pending Approval</span>
                                     </div>
                                 </div>
+                                
                                 <div className="modal-actions">
                                     <button 
                                         type="button" 
                                         className="cancel-btn"
                                         onClick={() => setShowBookingModal(false)}
+                                        disabled={isSubmittingBooking}
                                     >
                                         Cancel
                                     </button>
                                     <button 
                                         type="submit" 
                                         className="submit-btn"
+                                        disabled={isSubmittingBooking || !bookingDetails.check_in_date}
                                     >
-                                        Submit Booking Request
+                                        {isSubmittingBooking ? 'Submitting...' : 'Submit Booking Request'}
                                     </button>
                                 </div>
                             </form>
