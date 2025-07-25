@@ -1,23 +1,39 @@
-/* ViewHostels.css - Enhanced Modern Design */
+/* ViewHostels.css - Enhanced Modern Design with Layout Fixes */
+
+/* Reset any conflicting styles */
+.view-hostels-wrapper * {
+  box-sizing: border-box;
+}
+
+/* Main wrapper to prevent layout conflicts */
+.view-hostels-wrapper {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding-top: 2rem;
+  margin: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
 
 .view-hostels-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: 100vh;
+  padding: 0 2rem 2rem 2rem;
 }
 
-/* Page Header */
+/* Page Header - Adjusted for layout compatibility */
 .page-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 20px;
-  padding: 2.5rem;
+  padding: 2rem;
   margin-bottom: 2rem;
   color: white;
   box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
+  z-index: 2;
 }
 
 .page-header::before {
@@ -40,12 +56,25 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .header-icon {
-  font-size: 4rem;
+  font-size: 3rem;
   animation: bounce 2s infinite;
+}
+
+.header-text h1 {
+  font-size: 2.5rem;
+  margin: 0;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.header-text p {
+  font-size: 1.1rem;
+  margin: 0.5rem 0 0 0;
+  opacity: 0.9;
 }
 
 @keyframes bounce {
@@ -54,34 +83,24 @@
   60% { transform: translateY(-5px); }
 }
 
-.header-text h1 {
-  font-size: 3rem;
-  margin: 0;
-  font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-}
-
-.header-text p {
-  font-size: 1.2rem;
-  margin: 0.5rem 0 0 0;
-  opacity: 0.9;
-}
-
 .header-stats {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .stat-card {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   border-radius: 15px;
-  padding: 1.5rem;
+  padding: 1.2rem;
   text-align: center;
-  min-width: 120px;
+  min-width: 100px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   transition: transform 0.3s ease;
+  flex: 1;
+  max-width: 150px;
 }
 
 .stat-card:hover {
@@ -90,13 +109,13 @@
 
 .stat-number {
   display: block;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #fff;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   opacity: 0.8;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -242,13 +261,15 @@
   color: white;
 }
 
-/* Search Container */
+/* Search Container - Layout optimized */
 .search-container {
   background: white;
   border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  position: relative;
+  z-index: 2;
 }
 
 .search-header {
@@ -325,11 +346,13 @@
   text-align: center;
 }
 
-/* Hostels Grid */
+/* Hostels Grid - Optimized spacing */
 .hostels-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .hostel-card {
@@ -718,58 +741,90 @@
   border-radius: 15px !important;
 }
 
-/* Responsive Design */
+/* Responsive Design - Updated for better layout */
 @media (max-width: 1200px) {
   .view-hostels-container {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+  }
+  
+  .page-header {
     padding: 1.5rem;
+  }
+  
+  .header-text h1 {
+    font-size: 2.2rem;
   }
   
   .header-stats {
     justify-content: center;
+    gap: 1rem;
   }
   
   .hostels-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
   }
 }
 
 @media (max-width: 768px) {
+  .view-hostels-wrapper {
+    padding-top: 1rem;
+  }
+  
   .view-hostels-container {
-    padding: 1rem;
+    padding: 0 1rem 1rem 1rem;
   }
   
   .page-header {
-    padding: 2rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
   }
   
   .header-content {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
+    margin-bottom: 1rem;
   }
   
   .header-text h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
   
   .header-stats {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0.5rem;
   }
   
   .stat-card {
-    width: 100%;
-    max-width: 200px;
+    min-width: 80px;
+    padding: 1rem;
+    max-width: none;
+    flex: 1;
+  }
+  
+  .stat-number {
+    font-size: 1.8rem;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem;
+  }
+  
+  .search-container {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
   }
   
   .search-filters {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .hostels-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .hostel-detail-card {
@@ -815,16 +870,30 @@
 }
 
 @media (max-width: 480px) {
+  .view-hostels-container {
+    padding: 0 0.75rem 0.75rem 0.75rem;
+  }
+  
   .page-header {
-    padding: 1.5rem;
+    padding: 1rem;
+    border-radius: 15px;
   }
   
   .header-text h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
+  }
+  
+  .header-icon {
+    font-size: 2.5rem;
   }
   
   .search-container {
-    padding: 1.5rem;
+    padding: 1rem;
+    border-radius: 15px;
+  }
+  
+  .hostel-card {
+    border-radius: 15px;
   }
   
   .hostel-content {
@@ -833,6 +902,7 @@
   
   .hostel-actions {
     flex-direction: column;
+    gap: 0.5rem;
   }
   
   .detail-info-section {
@@ -840,7 +910,7 @@
   }
   
   .detail-title h1 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 }
 
