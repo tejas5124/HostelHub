@@ -2201,7 +2201,7 @@ app.put('/admin-update/:admin_id', (req, res) => {
 });
 
 
-// Add a review
+// Add a review - FIXED VERSION
 app.post('/api/reviews', (req, res) => {
   const { name, rating, comment } = req.body;
 
@@ -2209,7 +2209,8 @@ app.post('/api/reviews', (req, res) => {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
-  const query = 'INSERT INTO reviews (name, rating, comment, created_at) VALUES (?, ?, ?, NOW())';
+  // Include the date field in the INSERT query
+  const query = 'INSERT INTO reviews (name, rating, comment, date, created_at) VALUES (?, ?, ?, CURDATE(), NOW())';
 
   dbQuery(query, [name, rating, comment], (err, result) => {
     if (err) {
@@ -2221,17 +2222,17 @@ app.post('/api/reviews', (req, res) => {
       id: result.insertId,
       name,
       rating,
-      comment
+      comment,
+      date: new Date().toISOString().split('T')[0] // Format as YYYY-MM-DD
     };
 
     res.status(201).json(newReview);
   });
 });
 
-
-// Get all reviews
+// Get all reviews - FIXED VERSION
 app.get('/api/reviews', (req, res) => {
-  const query = 'SELECT * FROM reviews ORDER BY created_at DESC';
+  const query = 'SELECT id, name, rating, comment, date, created_at FROM reviews ORDER BY created_at DESC';
 
   dbQuery(query, (err, results) => {
     if (err) {
