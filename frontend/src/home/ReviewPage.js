@@ -60,6 +60,7 @@ const ReviewPage = () => {
   return (
     <>
       <Navbar />
+    <div style={{ height: '80px' }}></div>
       <main>
         <div className="review-section">
           <div className="review-header">
