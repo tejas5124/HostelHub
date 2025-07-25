@@ -2209,8 +2209,9 @@ app.post('/api/reviews', (req, res) => {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
-  const query = 'INSERT INTO reviews (name, rating, comment) VALUES (?, ?, ?)';
-  db.query(query, [name, rating, comment], (err, result) => {
+  const query = 'INSERT INTO reviews (name, rating, comment, created_at) VALUES (?, ?, ?, NOW())';
+
+  dbQuery(query, [name, rating, comment], (err, result) => {
     if (err) {
       console.error('Error inserting review:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
@@ -2220,23 +2221,27 @@ app.post('/api/reviews', (req, res) => {
       id: result.insertId,
       name,
       rating,
-      comment,
+      comment
     };
 
     res.status(201).json(newReview);
   });
 });
 
+
 // Get all reviews
 app.get('/api/reviews', (req, res) => {
-  db.query('SELECT * FROM reviews ORDER BY created_at DESC', (err, results) => {
+  const query = 'SELECT * FROM reviews ORDER BY created_at DESC';
+
+  dbQuery(query, (err, results) => {
     if (err) {
       console.error('Error fetching reviews:', err);
       return res.status(500).json({ message: 'Internal Server Error' });
     }
 
-    res.json(results);
+    res.status(200).json(results);
   });
 });
+
 
 //add code for pull request or comparing previous code 
