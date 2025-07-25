@@ -2200,4 +2200,43 @@ app.put('/admin-update/:admin_id', (req, res) => {
   });
 });
 
+
+// Add a review
+router.post('/api/reviews', (req, res) => {
+  const { name, rating, comment } = req.body;
+
+  if (!name || !rating || !comment) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  const query = 'INSERT INTO reviews (name, rating, comment) VALUES (?, ?, ?)';
+  db.query(query, [name, rating, comment], (err, result) => {
+    if (err) {
+      console.error('Error inserting review:', err);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+
+    const newReview = {
+      id: result.insertId,
+      name,
+      rating,
+      comment,
+    };
+
+    res.status(201).json(newReview);
+  });
+});
+
+// Get all reviews
+router.get('/api/reviews', (req, res) => {
+  db.query('SELECT * FROM reviews ORDER BY created_at DESC', (err, results) => {
+    if (err) {
+      console.error('Error fetching reviews:', err);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+
+    res.json(results);
+  });
+});
+
 //add code for pull request or comparing previous code 
