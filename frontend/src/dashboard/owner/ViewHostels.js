@@ -144,7 +144,8 @@ const ViewHostels = () => {
   return (
     <HostelLayout>
       <DashboardHeader role="owner" />
-      <div className="view-hostels-container">
+      <div className="view-hostels-wrapper">
+        <div className="view-hostels-container">
         <div className="page-header">
           <div className="header-content">
             <div className="header-icon">🏢</div>
@@ -419,6 +420,7 @@ const ViewHostels = () => {
             </div>
           )
         )}
+      </div>
       </div>
     </HostelLayout>
   );
