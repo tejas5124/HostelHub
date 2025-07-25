@@ -406,8 +406,8 @@ const ViewHostels = () => {
                   ← Back to List
                 </button>
                 <div className="detail-actions">
-                  <button className="edit-btn">✏️ Edit</button>
-                  <button className="share-btn">📤 Share</button>
+                 
+                 
                 </div>
               </div>
               
