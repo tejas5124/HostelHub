@@ -76,6 +76,8 @@ class Contact extends React.Component {
     }
   }
 
+  <div style={{ height: '80px' }}></div>
+
   render() {
     const { formData, isSubmitting } = this.state;
 
