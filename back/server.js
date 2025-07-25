@@ -2202,7 +2202,7 @@ app.put('/admin-update/:admin_id', (req, res) => {
 
 
 // Add a review
-router.post('/api/reviews', (req, res) => {
+app.post('/api/reviews', (req, res) => {
   const { name, rating, comment } = req.body;
 
   if (!name || !rating || !comment) {
@@ -2228,7 +2228,7 @@ router.post('/api/reviews', (req, res) => {
 });
 
 // Get all reviews
-router.get('/api/reviews', (req, res) => {
+app.get('/api/reviews', (req, res) => {
   db.query('SELECT * FROM reviews ORDER BY created_at DESC', (err, results) => {
     if (err) {
       console.error('Error fetching reviews:', err);
