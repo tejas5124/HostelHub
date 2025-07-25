@@ -76,8 +76,6 @@ class Contact extends React.Component {
     }
   }
 
-  <div style={{ height: '80px' }}></div>
-
   render() {
     const { formData, isSubmitting } = this.state;
 
@@ -85,6 +83,8 @@ class Contact extends React.Component {
       <>
         <div>
           <Navbar/>
+          {/* Spacer div to account for fixed navbar */}
+          <div style={{ height: '80px' }}></div>
           <main>
             <div className="contact-container">
               {/* Hero Section */}
