@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './home/Homepage';
 import AboutPage from './home/Aboutpage';
-import ReviewPage from './home/review';
+import ReviewPage from './home/ReviewPage';
 import Contact from './common/Contact';
 import Shc from './home/Shc';
 import StudentLogin from './LoginRegister/StudentLogin';

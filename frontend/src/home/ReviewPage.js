@@ -177,4 +177,4 @@ const ReviewPage = () => {
   );
 };
 
-export default review;
+export default ReviewPage;
