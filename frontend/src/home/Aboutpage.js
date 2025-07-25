@@ -9,6 +9,8 @@ const AboutPage = () => {
     <>
     <div>
         <Navbar/>
+
+    <div style={{ height: '80px' }}></div>
       <main>
         <div className="about-section">
           <h1>About Us</h1>
