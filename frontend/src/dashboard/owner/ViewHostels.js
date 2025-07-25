@@ -422,6 +422,8 @@ const ViewHostels = () => {
         )}
       </div>
       </div>
+    <div style={{ height: '80px' }}></div> {/* Add spacer here */}
+
     </HostelLayout>
   );
 };
