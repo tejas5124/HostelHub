@@ -384,9 +384,9 @@ const StudentDashboard = () => {
                     </button>
                     <button 
                         className="nav-button" 
-                        onClick={() => navigate('/profile')}
+                        onClick={() => navigate('/payment')}
                     >
-                        👤 Profile
+                         💳 Payment
                     </button>
                 </div>
             </div>
