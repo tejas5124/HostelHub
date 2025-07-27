@@ -26,6 +26,9 @@ const AddHostel = () => {
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
+    // Add body class for this page
+    document.body.classList.add('add-hostel-page');
+    
     const storedOwnerId = localStorage.getItem("owner_id");
     if (storedOwnerId) {
       setOwnerId(storedOwnerId);
@@ -39,6 +42,11 @@ const AddHostel = () => {
         navigate("/owner-login");
       });
     }
+
+    // Cleanup function to remove body class when component unmounts
+    return () => {
+      document.body.classList.remove('add-hostel-page');
+    };
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -121,259 +129,269 @@ const AddHostel = () => {
   };
 
   return (
-    <HostelLayout>
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
       <DashboardHeader role="owner" />
-      <div className="form-card">
-        <div className="form-header">
-          <h2>Add New Hostel</h2>
-          <p className="form-subtitle">Fill in the details to add your hostel</p>
-        </div>
-        
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">
-                <i className="fas fa-building"></i> Hostel Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Enter hostel name"
-                value={hostelData.name}
-                onChange={handleChange}
-                required
-              />
+      <HostelLayout>
+        <div className="main-content">
+          <div className="form-card">
+            <div className="form-header">
+              <h2>Add New Hostel</h2>
+              <p className="form-subtitle">Fill in the details to add your hostel</p>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="address" className="form-label">
-                <i className="fas fa-map-marker-alt"></i> Address
-              </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                placeholder="Enter hostel address"
-                value={hostelData.address}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group full-width">
-              <label htmlFor="description" className="form-label">
-                <i className="fas fa-align-left"></i> Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                placeholder="Describe your hostel"
-                value={hostelData.description}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="total_rooms" className="form-label">
-                <i className="fas fa-door-open"></i> Total Rooms
-              </label>
-              <input
-                type="number"
-                id="total_rooms"
-                name="total_rooms"
-                placeholder="Enter total rooms"
-                value={hostelData.total_rooms}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="available_rooms" className="form-label">
-                <i className="fas fa-bed"></i> Available Rooms
-              </label>
-              <input
-                type="number"
-                id="available_rooms"
-                name="available_rooms"
-                placeholder="Enter available rooms"
-                value={hostelData.available_rooms}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="rent" className="form-label">
-                <i className="fas fa-rupee-sign"></i> Monthly Rent
-              </label>
-              <input
-                type="number"
-                id="rent"
-                name="rent"
-                placeholder="Enter monthly rent"
-                value={hostelData.rent}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">
-                <i className="fas fa-venus-mars"></i> Hostel Type
-              </label>
-              <div className="gender-selection">
-                <label className="gender-option">
-                  <input
-                    type="radio"
-                    name="hostel_gender"
-                    value="boys"
-                    checked={hostelData.hostel_gender === "boys"}
-                    onChange={handleGenderChange}
-                    required
-                  />
-                  <span>Boys Hostel</span>
-                </label>
-                <label className="gender-option">
-                  <input
-                    type="radio"
-                    name="hostel_gender"
-                    value="girls"
-                    checked={hostelData.hostel_gender === "girls"}
-                    onChange={handleGenderChange}
-                    required
-                  />
-                  <span>Girls Hostel</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="facilities-section">
-            <label className="section-label">
-              <i className="fas fa-concierge-bell"></i> Available Facilities
-            </label>
-            <p className="facilities-subtitle">Select the facilities available in your hostel</p>
             
-            <div className="facilities-categories">
-              <div className="facility-category">
-                <h3 className="category-title">
-                  <i className="fas fa-wifi"></i> Basic Amenities
-                </h3>
-                <div className="facilities-grid">
-                  {[
-                    { name: "WiFi", icon: "fas fa-wifi", description: "High-speed internet access" },
-                    { name: "Hot Water", icon: "fas fa-hot-tub", description: "24/7 hot water supply" },
-                    { name: "AC", icon: "fas fa-snowflake", description: "Air conditioning in rooms" },
-                    { name: "Power Backup", icon: "fas fa-bolt", description: "Uninterrupted power supply" }
-                  ].map(({ name, icon, description }) => (
-                    <label key={name} className="facility-badge">
+            <form onSubmit={handleSubmit} encType="multipart/form-data">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="name" className="form-label">
+                    <i className="fas fa-building"></i> Hostel Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter hostel name"
+                    value={hostelData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="address" className="form-label">
+                    <i className="fas fa-map-marker-alt"></i> Address
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    placeholder="Enter hostel address"
+                    value={hostelData.address}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label htmlFor="description" className="form-label">
+                    <i className="fas fa-align-left"></i> Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe your hostel"
+                    value={hostelData.description}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="total_rooms" className="form-label">
+                    <i className="fas fa-door-open"></i> Total Rooms
+                  </label>
+                  <input
+                    type="number"
+                    id="total_rooms"
+                    name="total_rooms"
+                    placeholder="Enter total rooms"
+                    value={hostelData.total_rooms}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="available_rooms" className="form-label">
+                    <i className="fas fa-bed"></i> Available Rooms
+                  </label>
+                  <input
+                    type="number"
+                    id="available_rooms"
+                    name="available_rooms"
+                    placeholder="Enter available rooms"
+                    value={hostelData.available_rooms}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="rent" className="form-label">
+                    <i className="fas fa-rupee-sign"></i> Monthly Rent
+                  </label>
+                  <input
+                    type="number"
+                    id="rent"
+                    name="rent"
+                    placeholder="Enter monthly rent"
+                    value={hostelData.rent}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <i className="fas fa-venus-mars"></i> Hostel Type
+                  </label>
+                  <div className="gender-selection">
+                    <label className="gender-option">
                       <input
-                        type="checkbox"
-                        value={name}
-                        onChange={handleCheckboxChange}
+                        type="radio"
+                        name="hostel_gender"
+                        value="boys"
+                        checked={hostelData.hostel_gender === "boys"}
+                        onChange={handleGenderChange}
+                        required
                       />
-                      <div className="facility-content">
-                        <i className={icon}></i>
-                        <span className="facility-name">{name}</span>
-                        <span className="facility-description">{description}</span>
-                      </div>
+                      <span>Boys Hostel</span>
                     </label>
-                  ))}
+                    <label className="gender-option">
+                      <input
+                        type="radio"
+                        name="hostel_gender"
+                        value="girls"
+                        checked={hostelData.hostel_gender === "girls"}
+                        onChange={handleGenderChange}
+                        required
+                      />
+                      <span>Girls Hostel</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div className="facility-category">
-                <h3 className="category-title">
-                  <i className="fas fa-utensils"></i> Food & Services
-                </h3>
-                <div className="facilities-grid">
-                  {[
-                    { name: "Mess", icon: "fas fa-utensils", description: "In-house mess facility" },
-                    { name: "Laundry", icon: "fas fa-tshirt", description: "Laundry service available" },
-                    { name: "Housekeeping", icon: "fas fa-broom", description: "Regular room cleaning" },
-                    { name: "Cafeteria", icon: "fas fa-coffee", description: "On-site cafeteria" }
-                  ].map(({ name, icon, description }) => (
-                    <label key={name} className="facility-badge">
-                      <input
-                        type="checkbox"
-                        value={name}
-                        onChange={handleCheckboxChange}
-                      />
-                      <div className="facility-content">
-                        <i className={icon}></i>
-                        <span className="facility-name">{name}</span>
-                        <span className="facility-description">{description}</span>
-                      </div>
-                    </label>
-                  ))}
+              <div className="facilities-section">
+                <label className="section-label">
+                  <i className="fas fa-concierge-bell"></i> Available Facilities
+                </label>
+                <p className="facilities-subtitle">Select the facilities available in your hostel</p>
+                
+                <div className="facilities-categories">
+                  <div className="facility-category">
+                    <h3 className="category-title">
+                      <i className="fas fa-wifi"></i> Basic Amenities
+                    </h3>
+                    <div className="facilities-grid">
+                      {[
+                        { name: "WiFi", icon: "fas fa-wifi", description: "High-speed internet access" },
+                        { name: "Hot Water", icon: "fas fa-hot-tub", description: "24/7 hot water supply" },
+                        { name: "AC", icon: "fas fa-snowflake", description: "Air conditioning in rooms" },
+                        { name: "Power Backup", icon: "fas fa-bolt", description: "Uninterrupted power supply" }
+                      ].map(({ name, icon, description }) => (
+                        <label key={name} className="facility-badge">
+                          <input
+                            type="checkbox"
+                            value={name}
+                            onChange={handleCheckboxChange}
+                          />
+                          <div className="facility-content">
+                            <i className={icon}></i>
+                            <div className="facility-info">
+                              <span className="facility-name">{name}</span>
+                              <span className="facility-description">{description}</span>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="facility-category">
+                    <h3 className="category-title">
+                      <i className="fas fa-utensils"></i> Food & Services
+                    </h3>
+                    <div className="facilities-grid">
+                      {[
+                        { name: "Mess", icon: "fas fa-utensils", description: "In-house mess facility" },
+                        { name: "Laundry", icon: "fas fa-tshirt", description: "Laundry service available" },
+                        { name: "Housekeeping", icon: "fas fa-broom", description: "Regular room cleaning" },
+                        { name: "Cafeteria", icon: "fas fa-coffee", description: "On-site cafeteria" }
+                      ].map(({ name, icon, description }) => (
+                        <label key={name} className="facility-badge">
+                          <input
+                            type="checkbox"
+                            value={name}
+                            onChange={handleCheckboxChange}
+                          />
+                          <div className="facility-content">
+                            <i className={icon}></i>
+                            <div className="facility-info">
+                              <span className="facility-name">{name}</span>
+                              <span className="facility-description">{description}</span>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="facility-category">
+                    <h3 className="category-title">
+                      <i className="fas fa-dumbbell"></i> Recreation & Security
+                    </h3>
+                    <div className="facilities-grid">
+                      {[
+                        { name: "Gym", icon: "fas fa-dumbbell", description: "Fitness center access" },
+                        { name: "Parking", icon: "fas fa-parking", description: "Secure parking space" },
+                        { name: "Security", icon: "fas fa-shield-alt", description: "24/7 security" },
+                        { name: "Common Room", icon: "fas fa-tv", description: "Recreation area" }
+                      ].map(({ name, icon, description }) => (
+                        <label key={name} className="facility-badge">
+                          <input
+                            type="checkbox"
+                            value={name}
+                            onChange={handleCheckboxChange}
+                          />
+                          <div className="facility-content">
+                            <i className={icon}></i>
+                            <div className="facility-info">
+                              <span className="facility-name">{name}</span>
+                              <span className="facility-description">{description}</span>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="facility-category">
-                <h3 className="category-title">
-                  <i className="fas fa-dumbbell"></i> Recreation & Security
-                </h3>
-                <div className="facilities-grid">
-                  {[
-                    { name: "Gym", icon: "fas fa-dumbbell", description: "Fitness center access" },
-                    { name: "Parking", icon: "fas fa-parking", description: "Secure parking space" },
-                    { name: "Security", icon: "fas fa-shield-alt", description: "24/7 security" },
-                    { name: "Common Room", icon: "fas fa-tv", description: "Recreation area" }
-                  ].map(({ name, icon, description }) => (
-                    <label key={name} className="facility-badge">
-                      <input
-                        type="checkbox"
-                        value={name}
-                        onChange={handleCheckboxChange}
-                      />
-                      <div className="facility-content">
-                        <i className={icon}></i>
-                        <span className="facility-name">{name}</span>
-                        <span className="facility-description">{description}</span>
-                      </div>
-                    </label>
-                  ))}
+              <div className="image-upload-section">
+                <label className="section-label">
+                  <i className="fas fa-image"></i> Hostel Image
+                </label>
+                <div className="image-upload-container">
+                  <input
+                    type="file"
+                    id="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    required
+                    className="image-input"
+                  />
+                  <label htmlFor="image" className="image-upload-label">
+                    <i className="fas fa-cloud-upload-alt"></i>
+                    <span>Choose an image</span>
+                  </label>
+                  {imagePreview && (
+                    <div className="image-preview">
+                      <img src={imagePreview} alt="Preview" />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+
+              <button type="submit" className="submit-button">
+                <i className="fas fa-plus-circle"></i>
+                Add Hostel
+              </button>
+            </form>
           </div>
-
-          <div className="image-upload-section">
-            <label className="section-label">
-              <i className="fas fa-image"></i> Hostel Image
-            </label>
-            <div className="image-upload-container">
-              <input
-                type="file"
-                id="image"
-                accept="image/*"
-                onChange={handleImageChange}
-                required
-                className="image-input"
-              />
-              <label htmlFor="image" className="image-upload-label">
-                <i className="fas fa-cloud-upload-alt"></i>
-                <span>Choose an image</span>
-              </label>
-              {imagePreview && (
-                <div className="image-preview">
-                  <img src={imagePreview} alt="Preview" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <button type="submit" className="submit-button">
-            <i className="fas fa-plus-circle"></i>
-            Add Hostel
-          </button>
-        </form>
-      </div>
-      <div style={{ height: '80px' }}></div> {/* Add spacer here */}
-    </HostelLayout>
+        </div>
+        <div style={{ height: '100px' }}></div> {/* Add more spacer at bottom */}
+      </HostelLayout>
+    </div>
   );
 };
 
