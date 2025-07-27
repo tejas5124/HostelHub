@@ -372,8 +372,8 @@ const AddHostel = () => {
           </button>
         </form>
       </div>
+      <div style={{ height: '80px' }}></div> {/* Add spacer here */}
     </HostelLayout>
-   <div style={{ height: '80px' }}></div> {/* Add spacer here */}
   );
 };
 
