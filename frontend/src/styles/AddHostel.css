@@ -435,18 +435,18 @@ textarea {
 
 @media (max-width: 480px) {
   .add-hostel-container {
-    margin-top: 160px; /* Adjusted for smaller devices */
+    margin-top: 200px; /* Adjusted for smaller devices */
     padding: 10px;
     padding-top: 20px;
   }
 
   .hostel-layout {
-    padding-top: 160px !important;
+    padding-top: 200px !important;
   }
 
   .form-card {
     padding: 1.5rem;
-    margin: 1rem auto 2rem auto;
+    margin: 0 auto;
   }
 
   .form-header h2 {
