@@ -18,63 +18,168 @@ function StudentRegister() {
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [passwordStrength, setPasswordStrength] = useState('');
   const navigate = useNavigate();
 
-  const validateForm = () => {
-    const newErrors = {};
-    const { name, email, password, confirmPassword, phone_number, date_of_birth, gender, address } = student;
+  const validateField = (name, value) => {
+    const newErrors = { ...errors };
 
-    if (!name.trim()) newErrors.name = 'Full name is required';
-    else if (name.length < 2) newErrors.name = 'Full name must be at least 2 characters long';
+    switch (name) {
+      case 'name':
+        if (!value.trim()) {
+          newErrors.name = 'Full name is required';
+        } else if (value.trim().length < 2) {
+          newErrors.name = 'Full name must be at least 2 characters long';
+        } else {
+          delete newErrors.name;
+        }
+        break;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) newErrors.email = 'Email address is required';
-    else if (!emailRegex.test(email)) newErrors.email = 'Please enter a valid email address';
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value) {
+          newErrors.email = 'Email address is required';
+        } else if (!emailRegex.test(value)) {
+          newErrors.email = 'Please enter a valid email address';
+        } else {
+          delete newErrors.email;
+        }
+        break;
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!password) newErrors.password = 'Password is required';
-    else if (!passwordRegex.test(password)) newErrors.password =
-      'Password must be at least 8 characters long and contain uppercase, lowercase, number and special character';
+      case 'password':
+        if (!value) {
+          newErrors.password = 'Password is required';
+          setPasswordStrength('');
+        } else {
+          // Check password strength
+          const hasLower = /[a-z]/.test(value);
+          const hasUpper = /[A-Z]/.test(value);
+          const hasNumber = /\d/.test(value);
+          const hasSpecial = /[@$!%*?&]/.test(value);
+          const isLongEnough = value.length >= 8;
 
-    if (!confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
-    else if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+          const strengthScore = [hasLower, hasUpper, hasNumber, hasSpecial, isLongEnough].filter(Boolean).length;
 
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phone_number) newErrors.phone_number = 'Phone number is required';
-    else if (!phoneRegex.test(phone_number)) newErrors.phone_number = 'Please enter a valid 10-digit phone number';
+          if (strengthScore < 3) {
+            setPasswordStrength('weak');
+            newErrors.password = 'Password must contain uppercase, lowercase, number and special character';
+          } else if (strengthScore < 5) {
+            setPasswordStrength('medium');
+            newErrors.password = 'Password should be at least 8 characters with all requirements';
+          } else {
+            setPasswordStrength('strong');
+            delete newErrors.password;
+          }
+        }
+        break;
 
-    if (!date_of_birth) newErrors.date_of_birth = 'Date of birth is required';
-    else {
-      const dob = new Date(date_of_birth);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      if (age < 16) newErrors.date_of_birth = 'You must be at least 16 years old';
+      case 'confirmPassword':
+        if (!value) {
+          newErrors.confirmPassword = 'Confirm password is required';
+        } else if (student.password !== value) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+
+      case 'phone_number':
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!value) {
+          newErrors.phone_number = 'Phone number is required';
+        } else if (!phoneRegex.test(value)) {
+          newErrors.phone_number = 'Please enter a valid 10-digit phone number';
+        } else {
+          delete newErrors.phone_number;
+        }
+        break;
+
+      case 'date_of_birth':
+        if (!value) {
+          newErrors.date_of_birth = 'Date of birth is required';
+        } else {
+          const dob = new Date(value);
+          const today = new Date();
+          const age = today.getFullYear() - dob.getFullYear();
+          const monthDiff = today.getMonth() - dob.getMonth();
+          
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+          }
+          
+          if (age < 16) {
+            newErrors.date_of_birth = 'You must be at least 16 years old';
+          } else {
+            delete newErrors.date_of_birth;
+          }
+        }
+        break;
+
+      case 'gender':
+        if (!value) {
+          newErrors.gender = 'Gender is required';
+        } else {
+          delete newErrors.gender;
+        }
+        break;
+
+      case 'address':
+        if (!value.trim()) {
+          newErrors.address = 'Address is required';
+        } else if (value.trim().length < 10) {
+          newErrors.address = 'Please provide a complete address';
+        } else {
+          delete newErrors.address;
+        }
+        break;
+
+      default:
+        break;
     }
 
-    if (!gender) newErrors.gender = 'Gender is required';
-
-    if (!address.trim()) newErrors.address = 'Address is required';
-
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return !newErrors[name];
+  };
+
+  const validateForm = () => {
+    const fields = ['name', 'email', 'password', 'confirmPassword', 'phone_number', 'date_of_birth', 'gender', 'address'];
+    let isValid = true;
+
+    fields.forEach(field => {
+      if (!validateField(field, student[field])) {
+        isValid = false;
+      }
+    });
+
+    return isValid;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setStudent(prev => ({ ...prev, [name]: value }));
-
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+    
+    // Real-time validation
+    validateField(name, value);
+    
+    // Special case for confirm password when password changes
+    if (name === 'password' && student.confirmPassword) {
+      validateField('confirmPassword', student.confirmPassword);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!validateForm()) {
       Swal.fire({
         icon: 'error',
         title: 'Validation Error',
         text: 'Please check the form for errors',
+        background: '#f8f9fa',
+        customClass: {
+          title: 'swal-title',
+          content: 'swal-content'
+        }
       });
       return;
     }
@@ -94,30 +199,45 @@ function StudentRegister() {
       Swal.fire({
         icon: 'success',
         title: 'Registration Successful! 🎉',
-        text: 'Redirecting to login page...',
-        timer: 2000,
+        text: 'Welcome to our platform! Redirecting to login page...',
+        timer: 2500,
         showConfirmButton: false,
+        background: '#f8f9fa',
+        customClass: {
+          title: 'swal-title',
+          content: 'swal-content'
+        }
       });
 
-      setTimeout(() => navigate('/student-login'), 2000);
+      setTimeout(() => navigate('/student-login'), 2500);
     } catch (error) {
       console.error('Registration Error:', error);
+      setLoading(false);
+      
       const message = error?.response?.data?.message;
       if (message === 'Email is already registered. Please use a different email.') {
         Swal.fire({
           icon: 'error',
           title: 'Email Already Exists!',
           text: message,
+          background: '#f8f9fa',
+          customClass: {
+            title: 'swal-title',
+            content: 'swal-content'
+          }
         });
       } else {
         Swal.fire({
           icon: 'error',
           title: 'Registration Failed!',
           text: message || 'Something went wrong. Please try again.',
+          background: '#f8f9fa',
+          customClass: {
+            title: 'swal-title',
+            content: 'swal-content'
+          }
         });
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -126,91 +246,193 @@ function StudentRegister() {
       'name', 'email', 'password', 'confirmPassword',
       'date_of_birth', 'phone_number', 'gender', 'address',
     ];
-    const filled = fields.filter(f => student[f]?.trim());
-    return Math.round((filled.length / fields.length) * 100);
+    const filled = fields.filter(f => student[f]?.trim()).length;
+    return Math.round((filled / fields.length) * 100);
+  };
+
+  const getInputClass = (fieldName) => {
+    if (errors[fieldName]) return 'student-register-input error';
+    if (student[fieldName] && !errors[fieldName]) return 'student-register-input success';
+    return 'student-register-input';
+  };
+
+  const getSelectClass = () => {
+    if (errors.gender) return 'student-register-select error';
+    if (student.gender && !errors.gender) return 'student-register-select success';
+    return 'student-register-select';
+  };
+
+  const getTextareaClass = () => {
+    if (errors.address) return 'student-register-textarea error';
+    if (student.address && !errors.address) return 'student-register-textarea success';
+    return 'student-register-textarea';
   };
 
   return (
-    <div className="register-page">
-      <div className="register-card">
-        <h2 className="card-title">🎓 Student Registration</h2>
+    <div className="student-register-container">
+      <div className="student-register-form-card">
+        <h2 className="student-register-title">🎓 Student Registration</h2>
 
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${calculateFormProgress()}%` }}></div>
+        <div className="student-register-progress-container">
+          <div className="student-register-progress-bar">
+            <div 
+              className="student-register-progress-fill" 
+              style={{ width: `${calculateFormProgress()}%` }}
+            ></div>
+          </div>
+          <div className="student-register-progress-text">
+            Form Progress: {calculateFormProgress()}%
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="register-form">
+        <form onSubmit={handleSubmit} className="student-register-form">
           {/* NAME & EMAIL */}
-          <div className="form-row">
-            <div className="form-group">
-              <label>Full Name</label>
-              <input type="text" name="name" value={student.name} onChange={handleChange} className={errors.name ? 'error' : ''} />
-              {errors.name && <span className="error-message">{errors.name}</span>}
+          <div className="student-register-form-row">
+            <div className="student-register-form-group">
+              <label className="student-register-label">Full Name</label>
+              <input 
+                type="text" 
+                name="name" 
+                value={student.name} 
+                onChange={handleChange} 
+                className={getInputClass('name')}
+                placeholder="Enter your full name"
+                disabled={loading}
+              />
+              {errors.name && <span className="student-register-error-message">{errors.name}</span>}
             </div>
 
-            <div className="form-group">
-              <label>Email Address</label>
-              <input type="email" name="email" value={student.email} onChange={handleChange} className={errors.email ? 'error' : ''} />
-              {errors.email && <span className="error-message">{errors.email}</span>}
+            <div className="student-register-form-group">
+              <label className="student-register-label">Email Address</label>
+              <input 
+                type="email" 
+                name="email" 
+                value={student.email} 
+                onChange={handleChange} 
+                className={getInputClass('email')}
+                placeholder="Enter your email address"
+                disabled={loading}
+              />
+              {errors.email && <span className="student-register-error-message">{errors.email}</span>}
             </div>
           </div>
 
           {/* PASSWORDS */}
-          <div className="form-row">
-            <div className="form-group">
-              <label>Password</label>
-              <input type="password" name="password" value={student.password} onChange={handleChange} className={errors.password ? 'error' : ''} />
-              {errors.password && <span className="error-message">{errors.password}</span>}
+          <div className="student-register-form-row">
+            <div className="student-register-form-group">
+              <label className="student-register-label">Password</label>
+              <input 
+                type="password" 
+                name="password" 
+                value={student.password} 
+                onChange={handleChange} 
+                className={getInputClass('password')}
+                placeholder="Create a strong password"
+                disabled={loading}
+              />
+              {student.password && (
+                <div className={`student-register-password-strength ${passwordStrength}`}></div>
+              )}
+              {errors.password && <span className="student-register-error-message">{errors.password}</span>}
             </div>
 
-            <div className="form-group">
-              <label>Confirm Password</label>
-              <input type="password" name="confirmPassword" value={student.confirmPassword} onChange={handleChange} className={errors.confirmPassword ? 'error' : ''} />
-              {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+            <div className="student-register-form-group">
+              <label className="student-register-label">Confirm Password</label>
+              <input 
+                type="password" 
+                name="confirmPassword" 
+                value={student.confirmPassword} 
+                onChange={handleChange} 
+                className={getInputClass('confirmPassword')}
+                placeholder="Confirm your password"
+                disabled={loading}
+              />
+              {errors.confirmPassword && <span className="student-register-error-message">{errors.confirmPassword}</span>}
             </div>
           </div>
 
           {/* DOB & PHONE */}
-          <div className="form-row">
-            <div className="form-group">
-              <label>Date of Birth</label>
-              <input type="date" name="date_of_birth" value={student.date_of_birth} onChange={handleChange} className={errors.date_of_birth ? 'error' : ''} />
-              {errors.date_of_birth && <span className="error-message">{errors.date_of_birth}</span>}
+          <div className="student-register-form-row">
+            <div className="student-register-form-group">
+              <label className="student-register-label">Date of Birth</label>
+              <input 
+                type="date" 
+                name="date_of_birth" 
+                value={student.date_of_birth} 
+                onChange={handleChange} 
+                className={getInputClass('date_of_birth')}
+                disabled={loading}
+              />
+              {errors.date_of_birth && <span className="student-register-error-message">{errors.date_of_birth}</span>}
             </div>
 
-            <div className="form-group">
-              <label>Phone Number</label>
-              <input type="tel" name="phone_number" value={student.phone_number} onChange={handleChange} className={errors.phone_number ? 'error' : ''} />
-              {errors.phone_number && <span className="error-message">{errors.phone_number}</span>}
+            <div className="student-register-form-group">
+              <label className="student-register-label">Phone Number</label>
+              <input 
+                type="tel" 
+                name="phone_number" 
+                value={student.phone_number} 
+                onChange={handleChange} 
+                className={getInputClass('phone_number')}
+                placeholder="Enter 10-digit phone number"
+                disabled={loading}
+              />
+              {errors.phone_number && <span className="student-register-error-message">{errors.phone_number}</span>}
             </div>
           </div>
 
-          {/* GENDER & ADDRESS */}
-          <div className="form-group">
-            <label>Gender</label>
-            <select name="gender" value={student.gender} onChange={handleChange} className={errors.gender ? 'error' : ''}>
+          {/* GENDER */}
+          <div className="student-register-form-group">
+            <label className="student-register-label">Gender</label>
+            <select 
+              name="gender" 
+              value={student.gender} 
+              onChange={handleChange} 
+              className={getSelectClass()}
+              disabled={loading}
+            >
               <option value="">Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
-            {errors.gender && <span className="error-message">{errors.gender}</span>}
+            {errors.gender && <span className="student-register-error-message">{errors.gender}</span>}
           </div>
 
-          <div className="form-group">
-            <label>Address</label>
-            <textarea name="address" value={student.address} onChange={handleChange} rows="3" className={errors.address ? 'error' : ''}></textarea>
-            {errors.address && <span className="error-message">{errors.address}</span>}
+          {/* ADDRESS */}
+          <div className="student-register-form-group full-width">
+            <label className="student-register-label">Address</label>
+            <textarea 
+              name="address" 
+              value={student.address} 
+              onChange={handleChange} 
+              rows="3" 
+              className={getTextareaClass()}
+              placeholder="Enter your complete address"
+              disabled={loading}
+            ></textarea>
+            {errors.address && <span className="student-register-error-message">{errors.address}</span>}
           </div>
 
-          <button type="submit" className="register-submit-btn" disabled={loading}>
+          <button 
+            type="submit" 
+            className={`student-register-submit-btn ${loading ? 'loading' : ''}`}
+            disabled={loading || Object.keys(errors).length > 0}
+          >
             {loading ? 'Registering...' : 'Register Account'}
           </button>
         </form>
 
-        <div className="switch-page">
-          Already Registered?
-          <button type="button" onClick={() => navigate('/student-login')} className="login-redirect-btn">
+        <div className="student-register-switch-container">
+          <div className="student-register-switch-text">
+            Already Registered?
+          </div>
+          <button 
+            type="button" 
+            onClick={() => !loading && navigate('/student-login')} 
+            className="student-register-login-link"
+            disabled={loading}
+          >
             Login here
           </button>
         </div>
@@ -220,7 +442,6 @@ function StudentRegister() {
 }
 
 export default StudentRegister;
-
 
 
 
