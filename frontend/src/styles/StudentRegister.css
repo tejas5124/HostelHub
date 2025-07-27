@@ -1,245 +1,456 @@
-/* StudentRegister.css */
+/* StudentRegister.css - Unique styles to prevent conflicts */
 
-body {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f4f7fc; /* Light, subtle background for a clean look */
-}
-
-.register-page {
+.student-register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 800px 20px;
-  margin-top: 0;
-}
-
-.register-card {
-  background: white;
-  padding: 60px 50px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 1200px; /* Increased max-width for a wider, more rectangular look */
-  min-height: 600px; /* Ensure it's not too short on very wide screens */
-  display: flex; /* Use flexbox for internal alignment */
-  flex-direction: column;
-  justify-content: space-between; /* Pushes header/footer content to ends */
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.register-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-}
-
-.card-title {
-  color: #2c3e50;
-  margin-bottom: 30px;
-  font-size: 2.2rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: #e0e0e0;
-  border-radius: 4px;
-  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
   overflow: hidden;
 }
 
-.progress-fill {
+/* Animated background elements */
+.student-register-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+  background-size: 50px 50px;
+  animation: float 20s infinite linear;
+  z-index: 1;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-50px, -50px) rotate(360deg); }
+}
+
+.student-register-form-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 
+    0 25px 45px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.student-register-form-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 
+    0 35px 60px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.student-register-title {
+  color: #2d3748;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.student-register-progress-container {
+  margin-bottom: 30px;
+}
+
+.student-register-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(224, 231, 255, 0.6);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.student-register-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
   transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.register-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  width: 100%;
-  justify-content: center; /* Center form fields within the wider card */
+.student-register-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
 }
 
-.form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  width: 100%;
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-.form-group {
-  flex: 1; 
-  min-width: 300px; /* Adjusted min-width for larger fields */
-  text-align: left;
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #555;
-  font-size: 15px;
+.student-register-progress-text {
+  font-size: 14px;
+  color: #667eea;
   font-weight: 600;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.student-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+.student-register-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.student-register-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.student-register-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.student-register-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 5px;
+}
+
+.student-register-input,
+.student-register-select,
+.student-register-textarea {
   width: 100%;
-  padding: 14px 18px;
-  border: 1px solid #dcdcdc;
-  border-radius: 8px;
+  padding: 16px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   font-size: 16px;
-  transition: all 0.3s ease;
-  background: #fdfdfd;
-  color: #333;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  box-sizing: border-box;
+  color: #2d3748;
+  font-weight: 500;
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: #aaa;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: #007bff;
-  background: #fff;
+.student-register-input:focus,
+.student-register-select:focus,
+.student-register-textarea:focus {
+  border-color: #667eea;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  box-shadow: 
+    0 0 0 3px rgba(102, 126, 234, 0.1),
+    0 4px 12px rgba(102, 126, 234, 0.15);
+  background: #ffffff;
+  transform: translateY(-2px);
 }
 
-.form-group input.error,
-.form-group select.error,
-.form-group textarea.error {
-  border-color: #dc3545;
-  background: #ffebeb;
+.student-register-input::placeholder,
+.student-register-textarea::placeholder {
+  color: #a0aec0;
+  font-weight: 400;
 }
 
-.error-message {
-  color: #dc3545;
-  font-size: 13px;
-  margin-top: 6px;
-  display: block;
-}
-
-.form-group textarea {
-  min-height: 120px;
+.student-register-textarea {
+  min-height: 100px;
   resize: vertical;
+  font-family: inherit;
 }
 
-.register-submit-btn {
-  width: 100%;
-  padding: 15px;
-  background: linear-gradient(45deg, #007bff 0%, #0056b3 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 700;
+.student-register-select {
   cursor: pointer;
-  transition: all 0.3s ease;
+}
+
+.student-register-select option {
+  padding: 10px;
+  background: white;
+  color: #2d3748;
+}
+
+/* Error and success states */
+.student-register-input.error,
+.student-register-select.error,
+.student-register-textarea.error {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+  background: rgba(254, 226, 226, 0.5);
+}
+
+.student-register-input.success,
+.student-register-select.success,
+.student-register-textarea.success {
+  border-color: #38a169;
+  box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.1);
+  background: rgba(240, 253, 244, 0.5);
+}
+
+.student-register-error-message {
+  font-size: 12px;
+  color: #e53e3e;
+  font-weight: 500;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.student-register-error-message::before {
+  content: '⚠️';
+  font-size: 10px;
+}
+
+.student-register-submit-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
   margin-top: 20px;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
 }
 
-.register-submit-btn:hover:not(:disabled) {
+.student-register-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.student-register-submit-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
-  background: linear-gradient(45deg, #0056b3 0%, #007bff 100%);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
 }
 
-.register-submit-btn:disabled {
-  background: #a9a9a9;
+.student-register-submit-btn:hover::before {
+  left: 100%;
+}
+
+.student-register-submit-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+}
+
+.student-register-submit-btn:disabled {
+  background: #a0aec0;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-.switch-page {
-  margin-top: 30px;
-  color: #666;
-  font-size: 16px;
+.student-register-submit-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
-.login-redirect-btn {
-  background: none;
+.student-register-switch-container {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  text-align: center;
+}
+
+.student-register-switch-text {
+  font-size: 16px;
+  color: #4a5568;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.student-register-login-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   border: none;
-  color: #007bff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: color 0.3s ease, text-decoration 0.3s ease;
-  padding: 0 5px;
-  text-decoration: underline;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.login-redirect-btn:hover {
-  color: #0056b3;
-  text-decoration: none;
+.student-register-login-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
 }
 
-/* Responsive Design */
-@media (max-width: 992px) { /* Adjust breakpoint for larger screens */
-  .register-card {
-    max-width: 90%; /* Allow wider on medium screens */
-    padding: 40px 30px;
+/* Password strength indicator */
+.student-register-password-strength {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 2px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.student-register-password-strength.weak {
+  background: linear-gradient(90deg, #e53e3e 0%, #e53e3e 33%, #e2e8f0 33%);
+}
+
+.student-register-password-strength.medium {
+  background: linear-gradient(90deg, #ed8936 0%, #ed8936 66%, #e2e8f0 66%);
+}
+
+.student-register-password-strength.strong {
+  background: linear-gradient(90deg, #38a169 0%, #38a169 100%);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .student-register-container {
+    padding: 15px;
   }
-
-  .form-row {
-    flex-direction: column; /* Stack columns on smaller screens */
+  
+  .student-register-form-card {
+    padding: 30px 25px;
+    margin: 0 10px;
+    max-width: 100%;
+  }
+  
+  .student-register-title {
+    font-size: 24px;
+    margin-bottom: 25px;
+  }
+  
+  .student-register-form-row {
+    grid-template-columns: 1fr;
     gap: 15px;
   }
   
-  .form-group {
-    min-width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .register-card {
-    padding: 30px;
-    max-width: 95%;
-  }
-
-  .register-page {
-    padding: 30px 15px;
-  }
-
-  .card-title {
-    font-size: 2rem;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
+  .student-register-input,
+  .student-register-select,
+  .student-register-textarea {
+    padding: 14px 16px;
     font-size: 15px;
-    padding: 12px 15px;
   }
-
-  .register-submit-btn {
-    padding: 14px;
-    font-size: 17px;
+  
+  .student-register-submit-btn {
+    padding: 16px;
+    font-size: 16px;
   }
 }
 
-/* Animation for form elements */
+@media (max-width: 480px) {
+  .student-register-form-card {
+    padding: 25px 20px;
+  }
+  
+  .student-register-title {
+    font-size: 22px;
+  }
+}
+
+/* Custom scrollbar for textarea */
+.student-register-textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.student-register-textarea::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.student-register-textarea::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.student-register-textarea::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Form validation animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.student-register-form-group.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Success checkmark animation */
+.student-register-input.success::after,
+.student-register-select.success::after,
+.student-register-textarea.success::after {
+  content: '✓';
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #38a169;
+  font-weight: bold;
+  animation: fadeIn 0.3s ease;
+}
+
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-50%) scale(0.5); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
-/* Removed specific animation delays as form-group has parent animation */
+/* Loading state */
+.student-register-submit-btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.student-register-submit-btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
