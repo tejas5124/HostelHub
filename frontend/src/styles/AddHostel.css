@@ -1,6 +1,6 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
 
-/* Container Styling - UPDATED */
+/* Container Styling - FIXED */
 .add-hostel-container {
   display: flex;
   flex-direction: column;
@@ -8,21 +8,33 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
   padding: 20px;
-  margin-top: 180px; /* Increased to push content below header + nav */
-  padding-top: 20px; /* Added extra padding */
+  margin-top: 220px; /* Increased significantly to clear header */
+  padding-top: 40px; /* Added more padding */
 }
 
-/* Form Card - UPDATED */
+/* Form Card - FIXED */
 .form-card {
   background: white;
-  padding: 5rem;
+  padding: 3rem;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   max-width: 1000px;
   width: 100%;
-  margin: 2rem auto 0 auto; /* Top margin added */
+  margin: 3rem auto 4rem auto; /* Increased top and bottom margins */
   position: relative;
   z-index: 1;
+  margin-top: 0; /* Reset margin-top to avoid double spacing */
+}
+
+/* Alternative approach - Add padding to body when this page is active */
+body.add-hostel-page {
+  padding-top: 200px !important;
+}
+
+/* Ensure the layout wrapper has proper spacing */
+.hostel-layout {
+  padding-top: 200px !important;
+  min-height: 100vh;
 }
 
 /* Form Header */
@@ -360,9 +372,13 @@ textarea {
 
 /* RESPONSIVE DESIGN */
 @media (max-width: 1200px) {
+  .add-hostel-container {
+    margin-top: 200px;
+  }
+  
   .form-card {
-    padding: 3rem;
-    margin: 1.5rem auto 0 auto;
+    padding: 2.5rem;
+    margin: 2rem auto 3rem auto;
   }
 
   .facilities-categories {
@@ -376,14 +392,18 @@ textarea {
 
 @media (max-width: 768px) {
   .add-hostel-container {
-    margin-top: 140px; /* Adjusted for mobile header */
-    padding-top: 20px;
+    margin-top: 180px; /* Adjusted for mobile header */
+    padding-top: 30px;
     padding: 15px;
+  }
+
+  .hostel-layout {
+    padding-top: 180px !important;
   }
 
   .form-card {
     padding: 2rem;
-    margin: 1rem auto 0 auto;
+    margin: 1.5rem auto 2rem auto;
   }
 
   .form-grid {
@@ -415,13 +435,18 @@ textarea {
 
 @media (max-width: 480px) {
   .add-hostel-container {
-    margin-top: 120px; /* Adjusted for smaller devices */
+    margin-top: 160px; /* Adjusted for smaller devices */
     padding: 10px;
+    padding-top: 20px;
+  }
+
+  .hostel-layout {
+    padding-top: 160px !important;
   }
 
   .form-card {
     padding: 1.5rem;
-    margin: 0.5rem auto 0 auto;
+    margin: 1rem auto 2rem auto;
   }
 
   .form-header h2 {
@@ -447,11 +472,32 @@ textarea {
   }
 }
 
-/* Global Layout Fixes */
+/* Global Layout Fixes - UPDATED */
 body {
   padding-top: 0 !important;
+  margin: 0;
+  box-sizing: border-box;
 }
 
+/* Ensure proper spacing for the entire page */
 .hostel-layout {
-  padding-top: 0 !important;
+  padding-top: 200px !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* If you have a fixed header, add these styles */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Ensure the main content area starts below the header */
+.main-content {
+  margin-top: 200px;
+  position: relative;
+  z-index: 1;
 }
