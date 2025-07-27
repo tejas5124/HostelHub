@@ -147,9 +147,9 @@ const MyBookings = () => {
                         <span className="button-icon">📚</span>
                         My Bookings
                     </button>
-                    <button className="nav-button" onClick={() => navigate('/profile')}>
+                    <button className="nav-button" onClick={() => navigate('/payment')}>
                         <span className="button-icon">👤</span>
-                        Profile
+                        💳 Payment
                     </button>
                 </div>
             </div>
