@@ -1,6 +1,6 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
 
-/* Container Styling - FIXED: Added proper top margin */
+/* Container Styling - UPDATED */
 .add-hostel-container {
   display: flex;
   flex-direction: column;
@@ -8,11 +8,11 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
   padding: 20px;
-  margin-top: 160px; /* Increased from 80px to account for header (80px) + nav-menu (80px) */
-  padding-top: 40px; /* Added extra padding for better spacing */
+  margin-top: 180px; /* Increased to push content below header + nav */
+  padding-top: 20px; /* Added extra padding */
 }
 
-/* Form Card - FIXED: Added top margin for extra spacing */
+/* Form Card - UPDATED */
 .form-card {
   background: white;
   padding: 5rem;
@@ -20,7 +20,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   max-width: 1000px;
   width: 100%;
-  margin: 2rem auto 0 auto; /* Added top margin */
+  margin: 2rem auto 0 auto; /* Top margin added */
   position: relative;
   z-index: 1;
 }
@@ -358,7 +358,7 @@ textarea {
   font-size: 1.2rem;
 }
 
-/* RESPONSIVE DESIGN - UPDATED */
+/* RESPONSIVE DESIGN */
 @media (max-width: 1200px) {
   .form-card {
     padding: 3rem;
@@ -375,9 +375,8 @@ textarea {
 }
 
 @media (max-width: 768px) {
-  /* FIXED: Adjusted for mobile header layout */
   .add-hostel-container {
-    margin-top: 130px; /* Reduced for mobile header (60px) + nav (70px) */
+    margin-top: 140px; /* Adjusted for mobile header */
     padding-top: 20px;
     padding: 15px;
   }
@@ -415,9 +414,8 @@ textarea {
 }
 
 @media (max-width: 480px) {
-  /* FIXED: Further adjusted for very small screens */
   .add-hostel-container {
-    margin-top: 120px; /* Adjusted for smaller mobile header */
+    margin-top: 120px; /* Adjusted for smaller devices */
     padding: 10px;
   }
 
@@ -449,12 +447,11 @@ textarea {
   }
 }
 
-/* Additional spacing fix to ensure no overlap */
+/* Global Layout Fixes */
 body {
   padding-top: 0 !important;
 }
 
-/* Ensure the HostelLayout doesn't interfere */
 .hostel-layout {
   padding-top: 0 !important;
 }
