@@ -382,12 +382,7 @@ const StudentDashboard = () => {
                     >
                         📚 My Bookings
                     </button>
-                    <button 
-                        className="nav-button" 
-                        onClick={() => navigate('/payment')}
-                    >
-                         💳 Payment
-                    </button>
+                    
                 </div>
             </div>
             
