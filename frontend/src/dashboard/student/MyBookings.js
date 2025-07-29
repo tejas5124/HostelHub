@@ -147,10 +147,7 @@ const MyBookings = () => {
                         <span className="button-icon">📚</span>
                         My Bookings
                     </button>
-                    <button className="nav-button" onClick={() => navigate('/payment')}>
-                        <span className="button-icon">👤</span>
-                        💳 Payment
-                    </button>
+                    
                 </div>
             </div>
 
