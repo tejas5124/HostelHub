@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import api from '../../api';
-import '../../styles/view_hostel_admin.css';
 import AdminHeader from './AdminHeader';
+// Assuming the CSS file is now named view_hostel_admin.css and is in the same directory.
+import '../../styles/view_hostel_admin.css';
 
 const ViewHostels = () => {
   const [hostels, setHostels] = useState([]);
@@ -19,7 +20,7 @@ const ViewHostels = () => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Failed to fetch hostels: ' + err.message,
+          text: `Failed to fetch hostels: ${err.message}`,
         });
       } finally {
         setIsLoading(false);
@@ -47,17 +48,20 @@ const ViewHostels = () => {
         timer: 2000,
         showConfirmButton: false,
       });
-      setHostels(prev =>
-        prev.map(h => h.hostel_id === hostelId ? { ...h, approval_status: 'approved' } : h)
+      // Update the state to reflect the new status
+      setHostels((prev) =>
+        prev.map((h) =>
+          h.hostel_id === hostelId ? { ...h, approval_status: 'approved' } : h
+        )
       );
       if (selectedHostel?.hostel_id === hostelId) {
-        setSelectedHostel(prev => ({ ...prev, approval_status: 'approved' }));
+        setSelectedHostel((prev) => ({ ...prev, approval_status: 'approved' }));
       }
     } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Failed to approve hostel: ' + err.message,
+        text: `Failed to approve hostel: ${err.message}`,
       });
     }
   };
@@ -72,35 +76,39 @@ const ViewHostels = () => {
         timer: 2000,
         showConfirmButton: false,
       });
-      setHostels(prev =>
-        prev.map(h => h.hostel_id === hostelId ? { ...h, approval_status: 'rejected' } : h)
+      // Update the state to reflect the new status
+      setHostels((prev) =>
+        prev.map((h) =>
+          h.hostel_id === hostelId ? { ...h, approval_status: 'rejected' } : h
+        )
       );
       if (selectedHostel?.hostel_id === hostelId) {
-        setSelectedHostel(prev => ({ ...prev, approval_status: 'rejected' }));
+        setSelectedHostel((prev) => ({ ...prev, approval_status: 'rejected' }));
       }
     } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Failed to reject hostel: ' + err.message,
+        text: `Failed to reject hostel: ${err.message}`,
       });
     }
   };
 
-  const filteredHostels = hostels.filter(h =>
+  const filteredHostels = hostels.filter((h) =>
     filter === 'all' ? true : h.approval_status === filter
   );
 
   const getImageUrl = (path) => {
     if (!path) return '/placeholder.png';
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     return path.startsWith('/uploads/')
-      ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${path}`
-      : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/uploads/${path.replace(/^\/+/, '')}`;
+      ? `${apiUrl}${path}`
+      : `${apiUrl}/uploads/${path.replace(/^\/+/, '')}`;
   };
 
   if (isLoading) {
     return (
-      <div className="loading-container">
+      <div className="admin-view-hostel loading-container">
         <div className="loading-spinner"></div>
         <p>Loading hostels...</p>
       </div>
@@ -108,13 +116,13 @@ const ViewHostels = () => {
   }
 
   return (
-    <div className="view-hostels-container">
+    <div className="admin-view-hostel view-hostels-container">
       <AdminHeader />
 
       <div className="hostels-header">
         <h1>Hostel Management</h1>
         <div className="filter-buttons">
-          {['all', 'pending', 'approved', 'rejected'].map(status => (
+          {['all', 'pending', 'approved', 'rejected'].map((status) => (
             <button
               key={status}
               className={`filter-btn ${filter === status ? 'active' : ''}`}
@@ -143,7 +151,7 @@ const ViewHostels = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredHostels.length ? (
+              {filteredHostels.length > 0 ? (
                 filteredHostels.map((hostel, index) => (
                   <tr key={hostel.hostel_id}>
                     <td>{index + 1}</td>
@@ -160,15 +168,23 @@ const ViewHostels = () => {
                     </td>
                     <td>
                       <div className="action-buttons">
-                        <button onClick={() => handleViewDetails(hostel)} className="view-btn">View</button>
+                        <button onClick={() => handleViewDetails(hostel)} className="view-btn">
+                          View
+                        </button>
                         {hostel.approval_status === 'pending' && (
                           <>
-                            <button onClick={() => handleApprove(hostel.hostel_id)} className="approve-btn">Approve</button>
-                            <button onClick={() => handleReject(hostel.hostel_id)} className="reject-btn">Reject</button>
+                            <button onClick={() => handleApprove(hostel.hostel_id)} className="approve-btn">
+                              Approve
+                            </button>
+                            <button onClick={() => handleReject(hostel.hostel_id)} className="reject-btn">
+                              Reject
+                            </button>
                           </>
                         )}
                         {hostel.approval_status === 'rejected' && (
-                          <button onClick={() => handleApprove(hostel.hostel_id)} className="approve-btn">Re-approve</button>
+                          <button onClick={() => handleApprove(hostel.hostel_id)} className="approve-btn">
+                            Re-approve
+                          </button>
                         )}
                       </div>
                     </td>
@@ -176,7 +192,9 @@ const ViewHostels = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9" className="no-data">No hostels found for selected filter.</td>
+                  <td colSpan="9" className="no-data">
+                    No hostels found for selected filter.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -185,10 +203,10 @@ const ViewHostels = () => {
       ) : (
         <div className="hostel-details">
           <div className="details-header">
-            <button onClick={handleBack} className="back-button">
-              ← Back to List
-            </button>
             <div className="title-section">
+              <button onClick={handleBack} className="back-button">
+                ← Back to List
+              </button>
               <h2>{selectedHostel.name}</h2>
               <span className={`status-badge ${selectedHostel.approval_status}`}>
                 {selectedHostel.approval_status}
@@ -208,11 +226,26 @@ const ViewHostels = () => {
               </div>
 
               <div className="details-grid">
-                <div className="detail-item"><span className="detail-label">👥 Gender</span><span className="detail-value">{selectedHostel.hostel_gender === 'boys' ? 'Boys Hostel' : 'Girls Hostel'}</span></div>
-                <div className="detail-item"><span className="detail-label">📍 Address</span><span className="detail-value">{selectedHostel.address}</span></div>
-                <div className="detail-item"><span className="detail-label">💰 Rent</span><span className="detail-value">₹{selectedHostel.rent}</span></div>
-                <div className="detail-item"><span className="detail-label">🛏️ Total Rooms</span><span className="detail-value">{selectedHostel.total_rooms}</span></div>
-                <div className="detail-item"><span className="detail-label">🚪 Available Rooms</span><span className="detail-value">{selectedHostel.available_rooms}</span></div>
+                <div className="detail-item">
+                  <span className="detail-label">👥 Gender</span>
+                  <span className="detail-value">{selectedHostel.hostel_gender === 'boys' ? 'Boys Hostel' : 'Girls Hostel'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">📍 Address</span>
+                  <span className="detail-value">{selectedHostel.address}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">💰 Rent</span>
+                  <span className="detail-value">₹{selectedHostel.rent}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">🛏️ Total Rooms</span>
+                  <span className="detail-value">{selectedHostel.total_rooms}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">🚪 Available Rooms</span>
+                  <span className="detail-value">{selectedHostel.available_rooms}</span>
+                </div>
               </div>
 
               {selectedHostel.description && (
@@ -239,17 +272,23 @@ const ViewHostels = () => {
             </div>
 
             <div className="action-panel">
-              {selectedHostel.approval_status === 'pending' && (
-                <div className="action-buttons">
-                  <button onClick={() => handleApprove(selectedHostel.hostel_id)} className="approve-btn">Approve</button>
-                  <button onClick={() => handleReject(selectedHostel.hostel_id)} className="reject-btn">Reject</button>
-                </div>
-              )}
-              {selectedHostel.approval_status === 'rejected' && (
-                <div className="action-buttons">
-                  <button onClick={() => handleApprove(selectedHostel.hostel_id)} className="approve-btn">Re-approve</button>
-                </div>
-              )}
+              <div className="action-buttons">
+                {selectedHostel.approval_status === 'pending' && (
+                  <>
+                    <button onClick={() => handleApprove(selectedHostel.hostel_id)} className="approve-btn">
+                      Approve
+                    </button>
+                    <button onClick={() => handleReject(selectedHostel.hostel_id)} className="reject-btn">
+                      Reject
+                    </button>
+                  </>
+                )}
+                {selectedHostel.approval_status === 'rejected' && (
+                  <button onClick={() => handleApprove(selectedHostel.hostel_id)} className="approve-btn">
+                    Re-approve
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
